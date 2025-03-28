@@ -1,0 +1,58 @@
+{% trans_default_domain 'search' %}
+
+<ul class="dropdown-menu show border-light container p-1 position-relative mb-3 z-index-1">
+
+    {% if products %}
+
+        {% for product in products %}
+
+{#            {{ dd(product) }}#}
+
+            {% if product.product_image_ext is defined and product.product_image_ext is not null %}
+                {% set image_path = cdn_image_path(product.product_image, product.product_image_ext, product.product_image_cdn) %}
+            {% endif %}
+
+            {% set path = path('products-product:user.detail', {
+                category: product.category_url,
+                url: product.url,
+                offer: product.product_offer_value,
+                variation: product.product_variation_value,
+                modification: product.product_modification_value,
+                postfix: (product.product_modification_postfix ?: product.product_variation_postfix ?: product.product_offer_postfix ?: null )|replace({ '/': '-' }),
+            }) %}
+
+            <li>
+                <a href="{{ path }}"
+                   class="d-flex gap-3 align-items-center w-100 text-decoration-none dropdown-item rounded-3 p-2 pb-1 ">
+                    <div>
+                        <div class="icon rounded-4 mb-2 bg-contain p-1"
+                             style="width: 75px; height: 75px; background-image: url({{ image_path }});"></div>
+                    </div>
+                    <div class="small">
+                        <div class="badge bg-primary mb-1"> {{ product.category_name }}
+                        </div>
+                        <div class="text-primary fw-bolder"> {{ product.product_name }}
+
+                            {# Значение множественного варианта ТП #}
+                            {{ product.product_variation_value|call_twig_func(product.product_variation_reference~'_render')
+                            ~ product.product_modification_value|call_twig_func(product.product_modification_reference~'_render') }}
+
+                            {# Значение торгового предложения #}
+                            {{ product.product_offer_value|call_twig_func(product.product_offer_reference~'_render') }}
+
+                        </div>
+
+                        <div>{{ product.product_article }}</div>
+
+                        <div class="small text-muted"><small></small></div>
+                    </div>
+                </a>
+            </li>
+
+        {% endfor %}
+
+    {% else %}
+        <div class="no-content">{{ 'search_results.noresults'|trans }}</div>
+    {% endif %}
+
+</ul>

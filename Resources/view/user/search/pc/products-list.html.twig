@@ -1,0 +1,61 @@
+
+{% for item in result %}
+
+
+    {# Обложка  #}
+    {% set image_path = '/assets/img/blank.svg' %}
+
+    {% if item.product_image_ext is defined and item.product_image_ext is not null %}
+        {% set image_path = cdn_image_path(item.product_image, item.product_image_ext, item.product_image_cdn) %}
+    {% endif %}
+
+    <li>
+
+        {% set path = path('products-product:user.detail', {
+            category: item.category_url,
+            url: item.url,
+            offer: item.product_offer_value,
+            variation: item.product_variation_value,
+            modification: item.product_modification_value,
+            postfix: (item.product_modification_postfix ?: item.product_variation_postfix ?: item.product_offer_postfix ?: null )|replace({ '/': '-' }),
+        }) %}
+
+        <a href="{{ path }}"
+           class="d-flex gap-3 align-items-center w-100 text-decoration-none dropdown-item rounded-3 p-2 pb-1 ">
+            <div>
+                <div class="icon rounded-4 mb-2 {{ item.product_image_ext ? 'bg-contain' : 'bg-cover' }} p-1"
+                     style="width: 75px; height: 75px; background-image: url({{ image_path }});"></div>
+            </div>
+            <div class="small">
+
+                <div class="badge bg-primary mb-1">
+                    {{ item.category_name }}
+                </div>
+
+                <div class="text-primary fw-bolder">
+                    {{ item.product_name }}
+
+                    {# Значение множественного варианта ТП #}
+                    {{ item.product_variation_value|call_twig_func(item.product_variation_reference~'_render')
+                    ~ item.product_modification_value|call_twig_func(item.product_modification_reference~'_render') }}
+
+                    {# Значение торгового предложения #}
+                    {{ item.product_offer_value|call_twig_func(item.product_offer_reference~'_render') }}
+
+                </div>
+
+                {#                <div>{{ item.product_article }}</div>#}
+
+                <div class="small text-muted">
+                    <small>{{ item.search_desc|trans({
+                            '%PRODUCT_NAME%' : null,
+                            '%PRODUCT_OFFER%' : null,
+                            '%PRODUCT_VARIATION%' : null,
+                            '%PRODUCT_MOD%' : null,
+                        })|trim }}</small>
+                </div>
+            </div>
+        </a>
+    </li>
+
+{% endfor %}

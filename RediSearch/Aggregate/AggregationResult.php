@@ -4,7 +4,7 @@ namespace BaksDev\Search\RediSearch\Aggregate;
 
 class AggregationResult
 {
-    protected $count;
+//    protected int $count;
     protected $documents;
 
     public function __construct(int $count, array $documents)

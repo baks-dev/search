@@ -52,9 +52,4 @@ interface RedisSearchIndexTagInterface
 
     public function prepareDocument(array $item): EntityDocument;
 
-    /**
-     * Проверяет, относится ли строка тега к данному объекту
-     */
-//    public static function equals(string $tag): bool;
-
 }

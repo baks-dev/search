@@ -28,8 +28,9 @@ use BaksDev\Search\RedisSearchDocuments\EntityDocument;
 
 interface RedisSearchIndexInterface
 {
-//    public function addToIndex(array $item): void;
-    public function addToIndex(array $item, EntityDocument $entityDocument): void;
+    public function addToIndex(EntityDocument $entityDocument): void;
+
     public function removeFromIndex(ProductUid|string $product_id): void;
-    public function handleSearchQuery(?string $search = null, ?string $prefix = null): bool|array;
+
+    public function handleSearchQuery(?string $search = null, ?string $search_tag = null): bool|array;
 }

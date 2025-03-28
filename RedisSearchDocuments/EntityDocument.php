@@ -29,16 +29,14 @@ use BaksDev\Search\RediSearch\Fields\TextField;
 
 /**
  * @property TextField entity_index
- * @property TagField prefix
+ * @property TagField search_tag
  */
 class EntityDocument extends Document
 {
 
     protected TextField $entity_index;
-    protected TagField $prefix;
+    protected TagField $search_tag;
     protected $id;
-
-    //    protected string $product_description;
 
     /**
      * @return mixed
@@ -60,19 +58,19 @@ class EntityDocument extends Document
         return $this;
     }
 
-    public function getPrefix(): TagField
+    public function getSearchTag(): TagField
     {
-        return $this->prefix;
+        return $this->search_tag;
     }
 
-    public function setPrefix(string $prefix): self
+    public function setSearchTag(string $search_tag): self
     {
-        $this->prefix = new TagField('prefix', $prefix);
+        $this->search_tag = new TagField('search_tag', $search_tag);
 
         return $this;
     }
 
-    public function __construct(string $id = null)
+    public function __construct(?string $id = null)
     {
         parent::__construct($id);
     }

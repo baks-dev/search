@@ -31,7 +31,6 @@ use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -51,10 +50,10 @@ class RedisSearchIndexCommand extends Command
         parent::__construct();
     }
 
-//    protected function configure(): void
-//    {
-//        $this->addArgument('argument', InputArgument::OPTIONAL, 'Описание аргумента');
-//    }
+    //    protected function configure(): void
+    //    {
+    //        $this->addArgument('argument', InputArgument::OPTIONAL, 'Описание аргумента');
+    //    }
 
     protected function execute(
         InputInterface $input,
@@ -67,7 +66,6 @@ class RedisSearchIndexCommand extends Command
         $progressBar = new ProgressBar($output);
         $progressBar->start();
 
-
         /** @var RedisSearchIndexTagInterface $tag */
         foreach($this->redisTags->cases() as $tag)
         {
@@ -75,7 +73,7 @@ class RedisSearchIndexCommand extends Command
 
             foreach($repositoryData as $item)
             {
-                $this->handler->addToIndex($item, $tag->prepareDocument($item));
+                $this->handler->addToIndex($tag->prepareDocument($item));
                 $progressBar->advance();
             }
 

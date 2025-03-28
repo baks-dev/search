@@ -1,0 +1,12 @@
+breadcrumb:
+  label: 'Search'
+  title: 'Search'
+
+search_results:
+  title: 'Search results:'
+  noresults: 'No results found'
+  noresults_popup: 'Sorry no results found'
+  loading_text: 'Loading...'
+
+page:
+  title: 'Search'

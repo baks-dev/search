@@ -30,13 +30,8 @@ use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 #[AutoconfigureTag('baks.redis-tags')]
-class Product implements RedisSearchIndexTagInterface
+class ProductRedisSearchTag extends AbstractProductRedisSearchTag implements RedisSearchIndexTagInterface
 {
-
-    public function __construct(
-        private readonly AllProductsToIndexRepository $repository,
-        private readonly Switcher $switcher
-    ) {}
 
     public const TAG = 'product-products';
     public const INDEX_ID = 'id';
@@ -55,14 +50,24 @@ class Product implements RedisSearchIndexTagInterface
     }
 
     /**
-     * Создает EntityDocument для передачи в индекс
+     * @inheritDoc
      */
-    public function prepareDocument(array $item): EntityDocument {
-        $documentId = $item[self::INDEX_ID];
+    public static function sort(): int
+    {
+        return 1;
+    }
+
+
+    public function getRepositoryData(): array //
+    {
+        return $this->repository->getAllProductsToIndex();
+    }
+
+    public function prepareDocument(array $item): EntityDocument
+    {
+        $documentId = $item[$this->getIndexId()];
         $entityDocument = new EntityDocument($documentId);
 
-        // Необходимо очистить строки вида "TA01-16-205-55-94V" от символа дефиса '-' для правильной индексации и поиска
-        // see https://github.com/RediSearch/RediSearch/issues/2628
         $product_article = mb_strtolower(str_replace('-', ' ', $item['product_article']));
         $product_name = mb_strtolower($item['product_name']);
 
@@ -72,31 +77,9 @@ class Product implements RedisSearchIndexTagInterface
 
         $entityDocument
             ->setEntityIndex($product_article . ' ' . $product_name . ' ' . $transl_article . ' ' . $transl_name)
-            ->setPrefix(self::TAG);
+            ->setSearchTag($this->getValue());
 
         return $entityDocument;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public static function sort(): int
-    {
-        return 1;
-    }
-
-    // TODO
-    public function getRepositoryData(): array //
-    {
-//        $repo = new AllProductsRepository(); // нужно заинжектить через DI
-        return $this->repository->getAllProductsToIndex();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function equals(string $tag): bool
-    {
-        // TODO: Implement equals() method.
-    }
 }

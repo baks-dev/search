@@ -57,6 +57,6 @@ final class SearchHandler
             return;
         }
 
-        $this->handler->addToIndex($productData, $this->product->prepareDocument($productData));
+        $this->handler->addToIndex($this->product->prepareDocument($productData));
     }
 }

@@ -29,5 +29,6 @@ use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 interface AllProductsToIndexInterface
 {
     public function getAllProductsToIndex(UserProfileUid|string|null $profile): PaginatorInterface|array;
+
     public function getAllProductsOffersToIndex(UserProfileUid|string|null $profile): PaginatorInterface|array;
 }

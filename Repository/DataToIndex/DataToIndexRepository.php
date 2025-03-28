@@ -54,17 +54,18 @@ final readonly class DataToIndexRepository implements DataToIndexInterface
      */
     public function findProductDataToIndexRepository(ProductEventUid|string $eventUid): array|bool
     {
-        $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class)
+        $dbal = $this->DBALQueryBuilder
+            ->createQueryBuilder(self::class)
             ->bindLocal();
 
         $dbal
             ->addSelect('product.id AS id')
             ->join(
-            'product_event',
-            Product::class,
-            'product',
-            'product_event.id = product.event AND product.event = :event'
-        );
+                'product_event',
+                Product::class,
+                'product',
+                'product_event.id = product.event AND product.event = :event'
+            );
 
         $dbal
             ->addSelect('product_trans.name AS product_name')
@@ -75,15 +76,6 @@ final readonly class DataToIndexRepository implements DataToIndexInterface
                 'product_trans.event = product.event AND product_trans.local = :local AND product.event = :event'
             );
 
-// Описание товара НЕ включаем в индекс
-//        $dbal
-//            ->addSelect('product_description.description AS product_description')
-//            ->join(
-//                'product',
-//                ProductDescription::class,
-//                'product_description',
-//                'product_description.event = product.event AND product_description.local = :local AND product.event = :event AND product_description.device = :device'
-//            );
 
         /** Modify */
         $dbal
@@ -142,18 +134,13 @@ final readonly class DataToIndexRepository implements DataToIndexInterface
             ) AS product_article
 		");
 
-//        $dbal->addSelect("
-//            COALESCE(
-//                product_info.article
-//            ) AS product_article
-//		");
 
-        $dbal->from(ProductEvent::class, 'product_event')
+        $dbal
+            ->from(ProductEvent::class, 'product_event')
             ->setParameter('event', $eventUid, ProductEventUid::TYPE)
             ->setParameter('device', 'pc', ParameterType::STRING) /// TODO
         ;
 
-        return $dbal
-            ->fetchAssociative();
+        return $dbal->fetchAssociative();
     }
 }

@@ -26,61 +26,25 @@ namespace BaksDev\Search\Type\RedisTags;
 use BaksDev\Core\Services\Switcher\Switcher;
 use BaksDev\Search\RedisSearchDocuments\EntityDocument;
 use BaksDev\Search\Repository\AllProductsToIndex\AllProductsToIndexRepository;
-use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagInterface;
-use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
-#[AutoconfigureTag('baks.redis-tags')]
-class ProductOffer implements RedisSearchIndexTagInterface
+abstract class AbstractProductRedisSearchTag
 {
-
     public function __construct(
-        private readonly AllProductsToIndexRepository $repository,
-        private readonly Switcher $switcher
+        protected readonly AllProductsToIndexRepository $repository,
+        protected readonly Switcher $switcher
     ) {}
 
-    public const TAG = 'product-offers';
-    public const INDEX_ID = 'product_modification_id';
 
-    /**
-     * @inheritDoc
-     */
-    public function getValue(): string
-    {
-        return self::TAG;
-    }
+    abstract public function getValue();
 
-    public function getIndexId(): string
-    {
-        return self::INDEX_ID;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function sort(): int
-    {
-        return 2;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function equals(string $tag): bool
-    {
-        // TODO: Implement equals() method.
-    }
-
-    public function getRepositoryData(): array
-    {
-        return $this->repository->getAllProductsOffersToIndex();
-    }
+    abstract public function getIndexId();
 
     /**
      * Создает EntityDocument для передачи в индекс
      */
     public function prepareDocument(array $item): EntityDocument
     {
-        $documentId = $item[self::INDEX_ID];
+        $documentId = $item[$this->getIndexId()];
         $entityDocument = new EntityDocument($documentId);
 
         $product_article = mb_strtolower(str_replace('-', ' ', $item['product_article']));
@@ -92,7 +56,7 @@ class ProductOffer implements RedisSearchIndexTagInterface
 
         $entityDocument
             ->setEntityIndex($product_article . ' ' . $product_name . ' ' . $transl_article . ' ' . $transl_name)
-            ->setPrefix(self::TAG);
+            ->setSearchTag($this->getValue());
 
         return $entityDocument;
     }

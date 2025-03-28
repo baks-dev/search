@@ -23,14 +23,12 @@
 
 namespace BaksDev\Search\Index;
 
-use BaksDev\Core\Services\Switcher\Switcher;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Search\RediSearch\Index;
 use BaksDev\Search\RediSearch\Query\BuilderInterface;
 use BaksDev\Search\RedisRaw\PredisAdapter;
 use BaksDev\Search\RedisRaw\RedisRawClientInterface;
 use BaksDev\Search\RedisSearchDocuments\EntityDocument;
-use BaksDev\Search\RedisSearchDocuments\ProductDocument;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -52,7 +50,6 @@ final class RedisSearchIndexHandler implements RedisSearchIndexInterface
         private readonly string $REDIS_TABLE,
         private readonly string $REDIS_PASSWORD,
         private readonly LoggerInterface $logger,
-        private readonly Switcher $switcher,
     )
     {
 
@@ -76,26 +73,21 @@ final class RedisSearchIndexHandler implements RedisSearchIndexInterface
         $this->index = new Index($this->client);
         $this->index
             ->addTextField('entity_index')
-            ->addTagField('prefix');
+            ->addTagField('search_tag'); // rename -> search_tag
         if(!$this->index->exists())
         {
             $this->index->create();
         }
 
         // Удаление индекса
-//                 $this->index->drop(); die();
+//                         $this->index->drop(); die();
 
-        //        $this->index->setIndexName('BaksDevIndex');
-        //        dd($this->index->getIndexName()); die();
     }
 
-//    public function addToIndex(array $item, ?string $prefix = null, ?string $index_id = null): void
-    public function addToIndex(array $item, EntityDocument $entityDocument): void
+    public function addToIndex(EntityDocument $entityDocument): void
     {
-
         $this->index->delete($entityDocument->getId(), true);
         $this->index->add($entityDocument);
-
     }
 
     /**
@@ -108,16 +100,15 @@ final class RedisSearchIndexHandler implements RedisSearchIndexInterface
 
     /**
      * Получить результаты по поисковомоу слову, с учетов тегов
-     * @todo Пока метод в данном классе, при необходимости перенести в другой класс
      */
-    public function handleSearchQuery(?string $search = null, ?string $prefix = null): bool|array
+    public function handleSearchQuery(?string $search = null, ?string $search_tag = null): bool|array
     {
 
         /** @var BuilderInterface $builder */
         $builder = $this->index->noContent();
-        if(null !== $prefix)
+        if(null !== $search_tag)
         {
-            $builder->tagFilter('prefix', [$prefix]);
+            $builder->tagFilter('search_tag', [$search_tag]);
         }
         $result = $builder->search($search);
 

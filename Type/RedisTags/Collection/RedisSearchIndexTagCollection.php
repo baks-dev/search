@@ -41,7 +41,6 @@ final class RedisSearchIndexTagCollection
         foreach($this->redisTags as $key => $tag)
         {
             /** @var RedisSearchIndexTagInterface $tag */
-//            $tag = new $tag();
             $case[$key.$tag::sort()] = $tag;
         }
 

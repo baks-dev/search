@@ -21,16 +21,18 @@
  *  THE SOFTWARE.
  */
 
-declare(strict_types=1);
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
-namespace BaksDev\Search;
+return function(RoutingConfigurator $routes) {
+    
+    $MODULE = substr(__DIR__, 0, strpos(__DIR__, "Resources"));
 
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-
-class BaksDevSearchBundle extends AbstractBundle
-{
-    public const string NAMESPACE = __NAMESPACE__.'\\';
-
-    public const string PATH = __DIR__.DIRECTORY_SEPARATOR;
-
-}
+    $routes->import(
+        $MODULE.'Controller',
+        'attribute',
+        false,
+        $MODULE.'Controller/**/*Test.php'
+    )
+        ->prefix(\BaksDev\Core\Type\Locale\Locale::routes())
+        ->namePrefix('search:');
+};

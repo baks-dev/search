@@ -23,7 +23,9 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use BaksDev\Search\Command\RedisSearchIndexCommand;
 use BaksDev\Search\BaksDevSearchBundle;
+use BaksDev\Search\Index\RedisSearchIndexHandler;
 
 return static function(ContainerConfigurator $configurator) {
 
@@ -42,5 +44,19 @@ return static function(ContainerConfigurator $configurator) {
             $PATH.'**'.DIRECTORY_SEPARATOR.'*DTO.php',
             $PATH.'**'.DIRECTORY_SEPARATOR.'*Test.php',
         ]);
+    $services->get(RedisSearchIndexCommand::class)
+        ->bind('$REDIS_HOST','%env(REDIS_HOST)%')
+        ->bind('$REDIS_PORT','%env(REDIS_SEARCH_PORT)%')
+        ->bind('$REDIS_TABLE','%env(REDIS_SEARCH_TABLE)%')
+        ->bind('$REDIS_PASSWORD','%env(REDIS_PASSWORD)%')
+    ;
 
+    $services->get(RedisSearchIndexHandler::class)
+        ->bind('$REDIS_HOST','%env(REDIS_HOST)%')
+        ->bind('$REDIS_PORT','%env(REDIS_SEARCH_PORT)%')
+        ->bind('$REDIS_TABLE','%env(REDIS_SEARCH_TABLE)%')
+        ->bind('$REDIS_PASSWORD','%env(REDIS_PASSWORD)%')
+    ;
+
+    $services->load($NAMESPACE.'Type\RedisTags\\', $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'RedisTags']));
 };

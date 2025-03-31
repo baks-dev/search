@@ -1,0 +1,12 @@
+breadcrumb:
+  label: 'Поиск по сайту'
+  title: 'Поиск по сайту'
+
+search_results:
+  title: 'Результат поиска:'
+  noresults: 'По Вашему запросу не найдено результатов'
+  noresults_popup: 'К сожалению ничего не найдено'
+  loading_text: 'Загрузка...'
+
+page:
+  title: 'Поиск'

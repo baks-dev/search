@@ -5,13 +5,44 @@
 
 Модуль поиска
 
-## Установка
+## Предварительно: необходима установка redis-stack-server
+https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/linux/
+
+
+## Установка модуля
 
 ``` bash
 $ composer require baks-dev/search
 ```
 
-Тесты
+## Настройки
+
+Задаем настройки Redis Stack
+``` bash
+
+nano /opt/redis-stack/etc/redis-stack.conf
+ПРИМЕР:
+ port 6579
+ daemonize no
+ requirepass Po4ySG7W2EaOl4c
+```
+
+Перезапуск Redis Stack
+
+``` bash
+sudo systemctl restart redis-stack-server
+```
+
+В .env необходимо указать параметры
+REDIS_SEARCH_PORT=6579
+REDIS_SEARCH_TABLE=0
+
+## Команда для индексации
+``` bash
+php bin/console baks:redis:search:index
+```
+
+## Тесты
 
 ``` bash
 $ php bin/phpunit --group=search

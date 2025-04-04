@@ -1,0 +1,55 @@
+{# Обложка  #}
+    {% set image_path = '/assets/img/blank.svg' %}
+
+    {% if product.product_image_ext is defined and product.product_image_ext is not null %}
+		{% set image_path = cdn_image_path(product.product_image, product.product_image_ext, product.product_image_cdn) %}
+	{% endif %}
+
+<li>
+
+	{% set path = path('products-product:user.detail', {
+		category: product.category_url,
+		url: product.url,
+		offer: product.product_offer_value,
+		variation: product.product_variation_value,
+		modification: product.product_modification_value,
+		postfix: (product.product_modification_postfix ?: product.product_variation_postfix ?: product.product_offer_postfix ?: null )|replace({ '/': '-' }),
+	}) %}
+
+	<a href="{{ path }}"
+	   class="d-flex gap-3 align-items-center w-100 text-decoration-none dropdown-item rounded-3 p-2 pb-1 ">
+		<div>
+			<div class="icon rounded-4 mb-2 {{ product.product_image_ext ? 'bg-contain' : 'bg-cover' }} p-1"
+				 style="width: 75px; height: 75px; background-image: url({{ image_path }});"></div>
+		</div>
+		<div class="small">
+
+			<div class="badge bg-primary mb-1">
+				{{ product.category_name }}
+			</div>
+
+			<div class="text-primary fw-bolder">
+				{{ product.product_name }}
+
+				{# Значение множественного варианта ТП #}
+				{{ product.product_variation_value|call_twig_func(product.product_variation_reference~'_render')
+				~ product.product_modification_value|call_twig_func(product.product_modification_reference~'_render') }}
+
+				{# Значение торгового предложения #}
+				{{ product.product_offer_value|call_twig_func(product.product_offer_reference~'_render') }}
+
+			</div>
+
+			{#                <div>{{ product.product_article }}</div>#}
+
+			<div class="small text-muted">
+				<small>{{ product.search_desc|trans({
+						'%PRODUCT_NAME%' : null,
+						'%PRODUCT_OFFER%' : null,
+						'%PRODUCT_VARIATION%' : null,
+						'%PRODUCT_MOD%' : null,
+					})|trim }}</small>
+			</div>
+		</div>
+	</a>
+</li>

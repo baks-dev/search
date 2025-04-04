@@ -231,8 +231,6 @@ class Builder implements BuilderInterface
             return new SearchResult($rawResult[0], []);
         }
 
-//        dump($rawResult);
-
         return SearchResult::makeSearchResult(
             $rawResult,
             $documentsAsArray,

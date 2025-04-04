@@ -31,19 +31,22 @@ use BaksDev\Products\Category\Entity\Offers\CategoryProductOffers;
 use BaksDev\Products\Category\Entity\Offers\Variation\CategoryProductVariation;
 use BaksDev\Products\Category\Entity\Offers\Variation\Modification\CategoryProductModification;
 use BaksDev\Products\Category\Entity\Trans\CategoryProductTrans;
+use BaksDev\Products\Product\Entity\Active\ProductActive;
 use BaksDev\Products\Product\Entity\Category\ProductCategory;
-use BaksDev\Products\Product\Entity\Description\ProductDescription;
 use BaksDev\Products\Product\Entity\Event\ProductEvent;
 use BaksDev\Products\Product\Entity\Info\ProductInfo;
 use BaksDev\Products\Product\Entity\Offers\Image\ProductOfferImage;
 use BaksDev\Products\Product\Entity\Offers\Price\ProductOfferPrice;
 use BaksDev\Products\Product\Entity\Offers\ProductOffer;
+use BaksDev\Products\Product\Entity\Offers\Quantity\ProductOfferQuantity;
 use BaksDev\Products\Product\Entity\Offers\Variation\Image\ProductVariationImage;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\Image\ProductModificationImage;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\Price\ProductModificationPrice;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
+use BaksDev\Products\Product\Entity\Offers\Variation\Modification\Quantity\ProductModificationQuantity;
 use BaksDev\Products\Product\Entity\Offers\Variation\Price\ProductVariationPrice;
 use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
+use BaksDev\Products\Product\Entity\Offers\Variation\Quantity\ProductVariationQuantity;
 use BaksDev\Products\Product\Entity\Photo\ProductPhoto;
 use BaksDev\Products\Product\Entity\Price\ProductPrice;
 use BaksDev\Products\Product\Entity\Product;
@@ -52,9 +55,10 @@ use BaksDev\Products\Product\Entity\Seo\ProductSeo;
 use BaksDev\Products\Product\Entity\Trans\ProductTrans;
 use BaksDev\Search\Index\RedisSearchIndexHandler;
 
-use BaksDev\Search\Type\RedisTags\ProductOfferRedisSearchTag as ProductOfferRedis;
-use BaksDev\Search\Type\RedisTags\ProductVariationRedisSearchTag as ProductVariationRedis;
-use BaksDev\Search\Type\RedisTags\ProductModificationRedisSearchTag as ProductModificationRedis;
+use BaksDev\Search\Type\RedisTags\ProductOfferRedisSearchTag;
+use BaksDev\Search\Type\RedisTags\ProductRedisSearchTag;
+use BaksDev\Search\Type\RedisTags\ProductVariationRedisSearchTag;
+use BaksDev\Search\Type\RedisTags\ProductModificationRedisSearchTag;
 
 final class SearchAllProductsRepository implements SearchAllProductsInterface
 {
@@ -64,7 +68,7 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
     private ?SearchDTO $search = null;
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder,
-        private ?RedisSearchIndexHandler $redisSearchIndexHandler
+        private readonly ?RedisSearchIndexHandler $redisSearchIndexHandler
     ) {}
 
     public function search(SearchDTO $search): self
@@ -143,6 +147,7 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 
             $dbal
                 ->addSelect('product_offer.id as product_offer_uid')
+                //                ->addSelect('product_offer.id as product_offer_id')
                 ->addSelect('product_offer.const as product_offer_const')
                 ->addSelect('product_offer.value as product_offer_value')
                 ->addSelect('product_offer.postfix as product_offer_postfix')
@@ -241,13 +246,13 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
             /** Артикул продукта */
 
             $dbal->addSelect("
-                COALESCE(
-                    product_modification.article,
-                    product_variation.article,
-                    product_offer.article,
-                    product_info.article
-                ) AS product_article
-            ");
+                    COALESCE(
+                        product_modification.article,
+                        product_variation.article,
+                        product_offer.article,
+                        product_info.article
+                    ) AS product_article
+                ");
 
 
             /** Фото продукта */
@@ -298,8 +303,7 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 			   
 			   ELSE NULL
 			END AS product_image
-		"
-            );
+		    ");
 
             /** Флаг загрузки файла CDN */
             $dbal->addSelect("
@@ -338,14 +342,14 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
             /* Стоимость продукта */
 
             $dbal->addSelect('
-			COALESCE(
-                NULLIF(product_modification_price.price, 0), 
-                NULLIF(product_variation_price.price, 0), 
-                NULLIF(product_offer_price.price, 0), 
-                NULLIF(product_price.price, 0),
-                0
-            ) AS product_price
-		');
+                COALESCE(
+                    NULLIF(product_modification_price.price, 0), 
+                    NULLIF(product_variation_price.price, 0), 
+                    NULLIF(product_offer_price.price, 0), 
+                    NULLIF(product_price.price, 0),
+                    0
+                ) AS product_price
+            ');
 
 
             /* Предыдущая стоимость продукта */
@@ -362,9 +366,7 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 
             /* Валюта продукта */
 
-            $dbal->addSelect(
-                '
-			CASE
+            $CURRENCY = 'CASE
 			   WHEN product_modification_price.price IS NOT NULL AND product_modification_price.price > 0 
 			   THEN product_modification_price.currency
 			   
@@ -378,9 +380,10 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 			   THEN product_price.currency
 			   
 			   ELSE NULL
-			END AS product_currency
-		'
-            );
+			END';
+
+            $dbal->addSelect($CURRENCY.' AS product_currency ');
+            $dbal->andWhere($CURRENCY.' IS NOT NULL');
 
 
             /* Категория */
@@ -390,7 +393,6 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                 'product_event_category',
                 'product_event_category.event = product_event.id AND product_event_category.root = true'
             );
-
 
             $dbal->leftJoin(
                 'product_event_category',
@@ -411,6 +413,9 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 
             $dbal
                 ->addSelect('category_info.url AS category_url')
+                ->addSelect('category_info.minimal AS category_minimal')
+                ->addSelect('category_info.input AS category_input')
+                ->addSelect('category_info.threshold AS category_threshold')
                 ->leftJoin(
                     'category',
                     CategoryProductInfo::class,
@@ -418,6 +423,62 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                     'category_info.event = category.event'
                 );
 
+
+            /* Наличие продукта */
+
+            /* Наличие и резерв торгового предложения */
+            $dbal->leftJoin(
+                'product_offer',
+                ProductOfferQuantity::class,
+                'product_offer_quantity',
+                'product_offer_quantity.offer = product_offer.id'
+            );
+
+            /* Наличие и резерв множественного варианта */
+            $dbal->leftJoin(
+                'product_variation',
+                ProductVariationQuantity::class,
+                'product_variation_quantity',
+                'product_variation_quantity.variation = product_variation.id'
+            );
+
+            $dbal->leftJoin(
+                'product_modification',
+                ProductModificationQuantity::class,
+                'product_modification_quantity',
+                'product_modification_quantity.modification = product_modification.id'
+            );
+
+
+            $dbal->addSelect("
+			COALESCE(
+                    NULLIF(product_modification_quantity.quantity, 0),
+                    NULLIF(product_variation_quantity.quantity, 0),
+                    NULLIF(product_offer_quantity.quantity, 0),
+                    NULLIF(product_price.quantity, 0),
+                    0
+                ) AS product_quantity   
+            ");
+
+            $dbal->addSelect("
+                COALESCE(
+                    NULLIF(product_modification_quantity.reserve, 0),
+                    NULLIF(product_variation_quantity.reserve, 0),
+                    NULLIF(product_offer_quantity.reserve, 0),
+                    NULLIF(product_price.reserve, 0),
+                    0
+                ) AS product_reserve
+            ");
+
+            $dbal->join(
+                'product',
+                ProductActive::class,
+                'product_active',
+                '
+                    product_active.event = product.event AND 
+                    product_active.active IS TRUE    
+                '
+            );
 
             /** Product Invariable */
             $dbal
@@ -451,31 +512,46 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
             ');
 
 
-            /** Поиск */
+            /** Поиск  */
 
             $search = str_replace('-', ' ', $this->search->getQuery());
 
-            //          /** Модификация */
-            $entity_id_name = 'product_modification.id';
-            $result = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductModificationRedis::TAG);
+            /* Модификация */
+            $result_modification = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductModificationRedisSearchTag::TAG);
+            /* Вариация */
+            $result_variation = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductVariationRedisSearchTag::TAG);
+            /* ТП */
+            $result_offer = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductOfferRedisSearchTag::TAG);
+            /* Товар */
+            $result_product = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductRedisSearchTag::TAG);
 
-            if (!$result) {
-                /** Вариация */
-                $result = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductVariationRedis::TAG);
-                $entity_id_name = 'product_variation.id';
+            $builder = $dbal->createSearchQueryBuilder($this->search);
 
-                /** ТП */
-                if (!$result) {
-                    $result = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductOfferRedis::TAG);
-                    $entity_id_name = 'product_offer.id';
-                }
+            if ($result_modification) {
+                $builder->addSearchInArray('product_modification.id', array_column($result_modification, "id"));
             }
 
-            if($result)
+            if ($result_variation)
             {
-                $dbal
-                    ->createSearchQueryBuilder($this->search)
-                    ->addSearchInArray($entity_id_name, array_column($result, "id"));
+                $builder->addSearchInArray('product_variation.id', array_column($result_variation, "id"));
+            }
+
+            if ($result_offer)
+            {
+                $builder->addSearchInArray('product_offer.id', array_column($result_offer, "id"));
+            }
+
+            if ($result_product)
+            {
+                $builder->addSearchInArray('product.id', array_column($result_product, "id"));
+            }
+
+            if ($result_modification || $result_variation || $result_offer || $result_product)
+            {
+                $dbal->orderBy('product_reserve', 'DESC');
+
+                $dbal->setMaxResults(self::MAX_RESULTS);
+
                 return $dbal->fetchAllAssociative();
             }
 
@@ -494,7 +570,12 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 
                 ->addSearchLike('product_variation.article');
 
-            $dbal->orderBy('product.event');
+            $dbal->orderBy('product_info', 'DESC');
+
+            $dbal->addOrderBy('product_modification_quantity.quantity', 'DESC');
+            $dbal->addOrderBy('product_variation_quantity.quantity', 'DESC');
+            $dbal->addOrderBy('product_offer_quantity.quantity', 'DESC');
+            $dbal->addOrderBy('product_price.quantity', 'DESC');
 
             $dbal->setMaxResults(self::MAX_RESULTS);
 

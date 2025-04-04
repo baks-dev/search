@@ -26,10 +26,7 @@ namespace BaksDev\Search\Controller;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Form\Search\SearchForm;
-use BaksDev\Products\Product\Forms\ProductFilter\Admin\ProductFilterDTO;
 use BaksDev\Search\Repository\AllProducts\SearchAllProductsInterface;
-use Core\Repository\Modification\ProductsModificationSearchRepositoryInterface;
-use Core\Repository\Products\ProductsSearchRepositoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -43,7 +40,7 @@ final class SearchController extends AbstractController
     #[Route('/search', name: 'user.search', methods: ['POST', 'GET'], priority: 9)]
     public function search(
         Request $request,
-        SearchAllProductsInterface $getAllProduct,
+        SearchAllProductsInterface $getAllProduct
     ): Response
     {
 

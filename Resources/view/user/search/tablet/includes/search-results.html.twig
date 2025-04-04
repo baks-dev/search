@@ -2,7 +2,7 @@
 <ul class="dropdown-menu show border-light container p-1 position-relative mb-3 z-index-1">
 
     {% if products %}
-
+        {% set image_path = '/assets/img/blank.svg' %}
         {% for product in products %}
 
             {% if product.product_image_ext is defined and product.product_image_ext is not null %}
@@ -11,7 +11,7 @@
 
             {% set path = path('products-product:user.detail', {
                 category: product.category_url,
-                url: product.search_url,
+                url: product.url,
                 offer: product.product_offer_value,
                 variation: product.product_variation_value,
                 modification: product.product_modification_value,

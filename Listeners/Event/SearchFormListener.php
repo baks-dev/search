@@ -49,7 +49,6 @@ final class SearchFormListener
     /** Создает глобальную переменную для twig - форму поиска  */
     public function onKernelController(ControllerEvent $event): void
     {
-
         if($event->getRequest()->isXmlHttpRequest())
         {
             return;
@@ -61,10 +60,13 @@ final class SearchFormListener
         }
 
         $search = new SearchDTO($event->getRequest());
-        $searchForm = $this->formFactory->create(SearchForm::class, $search, [
-            'action' => '/search',
-        ]);
-        $searchForm->handleRequest($event->getRequest());
+        $searchForm = $this->formFactory
+            ->create(
+                type: SearchForm::class,
+                data: $search,
+                options: ['action' => '/search',]
+            )
+            ->handleRequest($event->getRequest());
 
         $this->twig->addGlobal('baks_search_form', $searchForm->createView());
 

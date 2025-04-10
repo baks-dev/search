@@ -60,3 +60,6 @@ final class SearchHandler
         $this->handler->addToIndex($this->product->prepareDocument($productData));
     }
 }
+
+
+isDeliveryTypeEquals

@@ -55,13 +55,10 @@ use BaksDev\Products\Product\Entity\ProductInvariable;
 use BaksDev\Products\Product\Entity\Seo\ProductSeo;
 use BaksDev\Products\Product\Entity\Trans\ProductTrans;
 use BaksDev\Search\Index\RedisSearchIndexHandler;
-
-use BaksDev\Search\RediSearch\Suggestion;
-use BaksDev\Search\RedisRaw\PredisAdapter;
+use BaksDev\Search\Type\RedisTags\ProductModificationRedisSearchTag;
 use BaksDev\Search\Type\RedisTags\ProductOfferRedisSearchTag;
 use BaksDev\Search\Type\RedisTags\ProductRedisSearchTag;
 use BaksDev\Search\Type\RedisTags\ProductVariationRedisSearchTag;
-use BaksDev\Search\Type\RedisTags\ProductModificationRedisSearchTag;
 use Psr\Log\LoggerInterface;
 
 final class SearchAllProductsRepository implements SearchAllProductsInterface
@@ -70,6 +67,7 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
     const int MAX_RESULTS = 10;
 
     private ?SearchDTO $search = null;
+
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder,
         private readonly ?RedisSearchIndexHandler $redisSearchIndexHandler
@@ -151,7 +149,6 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 
             $dbal
                 ->addSelect('product_offer.id as product_offer_uid')
-                //                ->addSelect('product_offer.id as product_offer_id')
                 ->addSelect('product_offer.const as product_offer_const')
                 ->addSelect('product_offer.value as product_offer_value')
                 ->addSelect('product_offer.postfix as product_offer_postfix')

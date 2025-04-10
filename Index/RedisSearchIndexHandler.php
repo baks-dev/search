@@ -59,9 +59,9 @@ final class RedisSearchIndexHandler implements RedisSearchIndexInterface
 
     public function initClient($host, $port, $table, $password): void
     {
-        $this->client = (new PredisAdapter($this->logger))->connect(
-            $host, $port, $table, $password
-        );
+        $this->client =
+            new PredisAdapter($this->logger)
+                ->connect($host, $port, $table, $password);
     }
 
     /**
@@ -70,18 +70,15 @@ final class RedisSearchIndexHandler implements RedisSearchIndexInterface
      */
     private function initIndex(): void
     {
-        $this->index = new Index($this->client);
-        $this->index
+        $this->index =
+            new Index($this->client)
             ->addTextField('entity_index')
-            ->addTagField('search_tag'); // rename -> search_tag
+                ->addTagField('search_tag');
+
         if(!$this->index->exists())
         {
             $this->index->create();
         }
-
-        // Удаление индекса
-//                         $this->index->drop(); die();
-
     }
 
     public function addToIndex(EntityDocument $entityDocument): void
@@ -99,17 +96,19 @@ final class RedisSearchIndexHandler implements RedisSearchIndexInterface
     }
 
     /**
-     * Получить результаты по поисковомоу слову, с учетов тегов
+     * Получить результаты по поисковому слову, с учетов тегов
      */
     public function handleSearchQuery(?string $search = null, ?string $search_tag = null): bool|array
     {
 
         /** @var BuilderInterface $builder */
         $builder = $this->index->noContent();
+
         if(null !== $search_tag)
         {
             $builder->tagFilter('search_tag', [$search_tag]);
         }
+
         $result = $builder->search($search);
 
         return $result->getCount() ? $result->getDocuments() : false;

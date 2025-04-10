@@ -41,7 +41,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class RedisSearchIndexCommand extends Command
 {
-
     public function __construct(
         private readonly RedisSearchIndexTagCollection $redisTags,
         private readonly RedisSearchIndexHandler $handler,
@@ -49,11 +48,6 @@ class RedisSearchIndexCommand extends Command
     {
         parent::__construct();
     }
-
-    //    protected function configure(): void
-    //    {
-    //        $this->addArgument('argument', InputArgument::OPTIONAL, 'Описание аргумента');
-    //    }
 
     protected function execute(
         InputInterface $input,

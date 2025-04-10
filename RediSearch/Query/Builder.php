@@ -7,7 +7,7 @@ use InvalidArgumentException;
 
 class Builder implements BuilderInterface
 {
-    public const GEO_FILTER_UNITS = ['m', 'km', 'mi', 'ft'];
+    public const array GEO_FILTER_UNITS = ['m', 'km', 'mi', 'ft'];
 
     protected $return = '';
     protected $summarize = '';
@@ -224,9 +224,11 @@ class Builder implements BuilderInterface
     {
 
         $rawResult = $this->redis->rawCommand('FT.SEARCH', $this->makeSearchCommandArguments($query));
+
         if (!$rawResult) {
             return new SearchResult(0, []);
         }
+
         if (is_array($rawResult) && count($rawResult) == 1) {
             return new SearchResult($rawResult[0], []);
         }

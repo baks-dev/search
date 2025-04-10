@@ -25,7 +25,6 @@ namespace BaksDev\Search\Type\RedisTags;
 
 use BaksDev\Core\Services\Switcher\Switcher;
 use BaksDev\Search\RedisSearchDocuments\EntityDocument;
-use BaksDev\Search\Repository\AllProductsToIndex\AllProductsToIndexRepository;
 use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
@@ -33,12 +32,10 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 class ProductRedisSearchTag extends AbstractProductRedisSearchTag implements RedisSearchIndexTagInterface
 {
 
-    public const TAG = 'product-products';
-    public const INDEX_ID = 'id';
+    public const string TAG = 'product-products';
 
-    /**
-     * @inheritDoc
-     */
+    public const string INDEX_ID = 'id';
+
     public function getValue(): string
     {
         return self::TAG;
@@ -49,9 +46,6 @@ class ProductRedisSearchTag extends AbstractProductRedisSearchTag implements Red
         return self::INDEX_ID;
     }
 
-    /**
-     * @inheritDoc
-     */
     public static function sort(): int
     {
         return 1;

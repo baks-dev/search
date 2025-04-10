@@ -100,7 +100,11 @@ final class AllProductsToIndexRepository implements AllProductsToIndexInterface
 
 
         $dbal->andWhere('product_info.profile = :profile OR product_info.profile IS NULL');
-        $dbal->setParameter('profile', $profile, UserProfileUid::TYPE);
+        $dbal->setParameter(
+            'profile',
+            $profile,
+            UserProfileUid::TYPE
+        );
 
 
         /* ProductInfo */

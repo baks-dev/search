@@ -35,22 +35,22 @@ use Symfony\Component\Routing\Annotation\Route;
 #[AsController]
 final class SearchController extends AbstractController
 {
-
-    /* Обновление страницы и сброс кеша */
     #[Route('/search', name: 'user.search', methods: ['POST', 'GET'], priority: 9)]
     public function search(
         Request $request,
-        SearchAllProductsInterface $getAllProduct
+        SearchAllProductsInterface $getAllProduct,
     ): Response
     {
-
         // Поиск
         $search = new SearchDTO($request);
-        $searchForm = $this->createForm(SearchForm::class, $search, [
-            'action' => $this->generateUrl('core:search'),
-        ]);
 
-        $searchForm->handleRequest($request);
+        $searchForm = $this
+            ->createForm(
+                type: SearchForm::class,
+                data: $search,
+                options: ['action' => $this->generateUrl('core:search'),]
+            )
+            ->handleRequest($request);
 
         $getAllProduct
             ->search($search);

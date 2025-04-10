@@ -8,5 +8,8 @@ search_results:
   noresults_popup: 'К сожалению ничего не найдено'
   loading_text: 'Загрузка...'
 
+search_input:
+  placeholder: 'Поиск по каталогу'
+
 page:
   title: 'Поиск'

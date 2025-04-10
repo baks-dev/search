@@ -13,22 +13,21 @@
             </div>
 
             {{ form_start(search) }}
-            <div class="w-100 d-flex mb-3">
-                {{ form_widget(search.query, { attr: { class : 'border-light w-100', style : 'min-width: 100%;' } }) }}
+                <div class="w-100 d-flex mb-3">
+                    {{ form_widget(search.query, { attr: { class : 'border-light w-100', style : 'min-width: 100%;' } }) }}
 
-                <div class="w-100 position-relative">
-                    <button class="btn position-absolute top-0 end-0" type="submit" aria-label="{{ 'page.title'|trans }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                             class="bi bi-search text-secondary" viewBox="0 0 16 16">
-                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
-                        </svg>
-                    </button>
+                    <div class="w-100 position-relative">
+                        <button class="btn position-absolute top-0 end-0" type="submit" aria-label="{{ 'page.title'|trans }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-search text-secondary" viewBox="0 0 16 16">
+                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="token" value="{{ csrf_token('search') }}"/>
+    {#                 <button type="submit" class="btn btn-primary btn-lg round-ignore has-ripple">Найти</button>#}
                 </div>
-
-                <input type="hidden" name="token" value="{{ csrf_token('search') }}"/>
-{#                 <button type="submit" class="btn btn-primary btn-lg round-ignore has-ripple">Найти</button>#}
-            </div>
-
             {{ form_end(search) }}
 
             {{ include(_self|replace({ "content.html.twig" : "includes/search-results.html.twig" })) }}

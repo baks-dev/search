@@ -7,6 +7,7 @@
 {# Персональная скидка #}
 {% set price = user_profile_discount(product.product_price) ?: product.product_price %}
 
+{# @TODO для тестирования #}
 {# {% set oldPrice = 910000 %} #}
 {% set oldPrice = user_profile_discount(product.product_old_price) ?: product.product_old_price %}
 
@@ -17,8 +18,13 @@
 <div class="card product-card h-100 border-0 p-2 position-relative rounded-4 bg-transparent ">
 
 	{# Изображение продукта #}
+
 	<div class="card-img-top rounded-4 ratio ratio-3x4"
 		 style="background: url({{ image_path }}) center no-repeat; background-color:white; ">
+
+		<div class="position-absolute z-3" style="width: 40px; height: 40px;">
+			{{ render_favorite_button(product.product_invariable_id) }}
+		</div>
 
 		<a class="d-block" href="{{ path('products-product:user.detail', {
 			category: product.category_url,
@@ -30,7 +36,7 @@
 		}) }}" aria-label="{{ product.product_name }}">
 		</a>
 
-		{{ render_favorite_button(product.product_invariable_id) }}
+
 
 	</div>
 
@@ -59,25 +65,11 @@
 				</div>
 
 				{% if product.product_quantity > 0 %}
-				<button data-href="{{ path('orders-order:user.add', {
-					product: product.event,
-					offer : product.product_offer_uid,
-					variation : product.product_variation_uid,
-					modification : product.product_modification_uid
-				}) }}"
-						data-bs-toggle="modal"
-						data-bs-target="#modal"
-						class="d-flex align-items-center btn btn-light rounded-5 modal-link px-0 add-basket"
-						title="Купить"
+					<button data-href="{{ path('orders-order:user.add', { product: product.event, offer : product.product_offer_uid, variation : product.product_variation_uid, modification : product.product_modification_uid }) }}" data-bs-toggle="modal" data-bs-target="#modal" class="d-flex align-items-center btn btn-light rounded-5 modal-link px-2 add-basket" title="Купить"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cart2" viewbox="0 0 16 16">
+							<path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5zM3.14 5l1.25 5h8.22l1.25-5H3.14zM5 13a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0z"></path>
+						</svg>
 
-				>
-
-					<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-						 class="bi bi-cart2" viewBox="0 0 16 16">
-						<path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5zM3.14 5l1.25 5h8.22l1.25-5H3.14zM5 13a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0z"></path>
-					</svg>
-
-				</button>
+					</button>
 				{% endif %}
 
 			</div>

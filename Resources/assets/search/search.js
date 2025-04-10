@@ -2,6 +2,7 @@ const search_form = document.forms.search_form;
 if (search_form) {
     const input = search_form.querySelector("#search_form_query");
     const search_result = document.getElementById("search_result");
+    const search_result_dropdown = document.getElementById("search_results_dropdown");
     if (search_result) {
         search_form.addEventListener("submit", function(event) {
             event.preventDefault()
@@ -42,6 +43,22 @@ if (search_form) {
             setTimeout(FFAAVWpUZ, HpbxMyNKd)
         }, 100)
     }
+
+    if(search_result_dropdown)
+    {
+        search_result_dropdown.addEventListener("mouseover", event =>
+        {
+            if(input.value.length > 2 && search_result.innerText)
+            {search_result.classList.add("show")}
+        });
+
+        search_result_dropdown.addEventListener("mouseout", event =>
+        {
+            if(input.value.length > 2 && search_result.innerText)
+            {search_result.classList.remove("show")}
+        });
+    }
+
 }
 async function submitSearch() {
     const search_icon = document.getElementById("search_icon");

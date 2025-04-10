@@ -67,5 +67,19 @@ final class SearchFormListener
         $searchForm->handleRequest($event->getRequest());
 
         $this->twig->addGlobal('baks_search_form', $searchForm->createView());
+
+        /* Форма поиска в футере */
+        $searchFormFooter = $this->formFactory
+            ->createNamed(
+                name: 'search_form_footer' ,
+                type: SearchForm::class,
+                data: $search,
+                options: [
+                    'action' => '/search',
+                ]
+            );
+
+        $searchFormFooter->handleRequest($event->getRequest());
+        $this->twig->addGlobal('baks_search_form_footer', $searchFormFooter->createView());
     }
 }

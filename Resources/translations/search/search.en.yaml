@@ -8,5 +8,8 @@ search_results:
   noresults_popup: 'Sorry no results found'
   loading_text: 'Loading...'
 
+search_input:
+  placeholder: 'Catalog search'
+
 page:
   title: 'Search'

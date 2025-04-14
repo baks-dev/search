@@ -37,7 +37,6 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 #[When(env: 'test')]
 class SearchHandleSearchQueryTest extends KernelTestCase
 {
-
     public static function setUpBeforeClass(): void
     {
         $test_product = [
@@ -46,30 +45,23 @@ class SearchHandleSearchQueryTest extends KernelTestCase
             'product_article' => 'Test-Product-Article',
         ];
 
-        $logger = self::getContainer()->get(LoggerInterface::class);
-        $RedisSearchIndexHandler = new RedisSearchIndexHandler(
-            'localhost', '6579', 0, 'Po4ySG7W2EaOl4c',
-            $logger
-        );
+        $RedisSearchIndexHandler = self::getContainer()->get(RedisSearchIndexHandler::class);
 
         /** @var ProductRedisSearchTag $tag */
         $tag = self::getContainer()->get(ProductRedisSearchTag::class);
         $RedisSearchIndexHandler->addToIndex($tag->prepareDocument($test_product));
+
     }
 
     public function testUseCase(): void
     {
-        self::bootKernel();
-        $logger = self::getContainer()->get(LoggerInterface::class);
-
-        $RedisSearchIndexHandler = new RedisSearchIndexHandler(
-            'localhost', '6579', 0, 'Po4ySG7W2EaOl4c',
-            $logger
-        );
+        $RedisSearchIndexHandler = self::getContainer()->get(RedisSearchIndexHandler::class);
 
         $results = $RedisSearchIndexHandler->handleSearchQuery('Test Product', ProductRedisSearchTag::TAG);
+        $result = current($results);
 
-        self::assertEquals($results[0]->id, ProductUid::TEST);
+        self::assertNotFalse($result);
+        self::assertEquals(ProductUid::TEST, $result->id);
         self::assertTrue(true);
     }
 }

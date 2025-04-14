@@ -30,7 +30,9 @@ class PredisAdapter extends AbstractRedisRawClient
             'database' => $db,
             'password' => $password,
         ]);
+
         $this->redis->connect();
+
         return $this;
     }
 

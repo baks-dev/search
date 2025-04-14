@@ -1,15 +1,13 @@
 # BaksDev Search
 
-[![Version](https://img.shields.io/badge/version-7.2.2-blue)](https://github.com/baks-dev/search/releases)
+[![Version](https://img.shields.io/badge/version-7.2.3-blue)](https://github.com/baks-dev/search/releases)
 ![php 8.4+](https://img.shields.io/badge/php-min%208.4-red.svg)
 
 Модуль поиска
 
-## Предварительно: необходима установка redis-stack-server
-https://redis.io/docs/latest/operate/oss_and_stack/install/install-stack/linux/
-
-
 ## Установка модуля
+
+Предварительно: необходима установка [redis-stack-server](REDIS.md)
 
 ``` bash
 $ composer require baks-dev/search
@@ -18,26 +16,48 @@ $ composer require baks-dev/search
 ## Настройки
 
 Задаем настройки Redis Stack
-``` bash
 
-nano /opt/redis-stack/etc/redis-stack.conf
-ПРИМЕР:
- port 6579
- daemonize no
- requirepass Po4ySG7W2EaOl4c
+``` bash
+sudo nano /opt/redis-stack/etc/redis-stack.conf
 ```
 
-Перезапуск Redis Stack
+Пример настройки redis-stack.conf:
+
+``` redis
+port 6579
+daemonize no
+requirepass <YOU_PASSWORD>
+```
+
+В .env необходимо указать параметры
+
+``` dotenv
+REDIS_SEARCH_HOST=localhost
+REDIS_SEARCH_PORT=6579
+REDIS_SEARCH_TABLE=0
+REDIS_SEARCH_PASSWORD=<YOU_PASSWORD>
+```
+
+Перезапускаем Redis Stack
 
 ``` bash
 sudo systemctl restart redis-stack-server
 ```
 
-В .env необходимо указать параметры
-REDIS_SEARCH_PORT=6579
-REDIS_SEARCH_TABLE=0
+Проверка работы Redis
 
-## Команда для индексации
+```bash
+redis-cli -p 6579
+127.0.0.1:6579> AUTH <YOU_PASSWORD>
+OK
+127.0.0.1:6579> PING
+PONG
+```
+
+Ctrl+D чтобы выйти
+
+##### Команда для индексации
+
 ``` bash
 php bin/console baks:redis:search:index
 ```

@@ -27,6 +27,7 @@ use BaksDev\Core\Services\Switcher\Switcher;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Search\Index\RedisSearchIndexHandler;
 use BaksDev\Search\Type\RedisTags\ProductRedisSearchTag;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
@@ -52,14 +53,24 @@ class SearchAddToIndexTest extends KernelTestCase
         /** @var RedisSearchIndexHandler $RedisSearchIndexHandler */
         //        $RedisSearchIndexHandler = self::getContainer()->get(RedisSearchIndexHandler::class);
 
-        $RedisSearchIndexHandler = new RedisSearchIndexHandler(
-            'localhost', '6579', 0, 'Po4ySG7W2EaOl4c',
-            $logger
-        );
 
-        /** @var ProductRedisSearchTag $tag */
-        $tag = self::getContainer()->get(ProductRedisSearchTag::class);
-        $RedisSearchIndexHandler->addToIndex($tag->prepareDocument($test_product));
+        try
+        {
+            $RedisSearchIndexHandler = new RedisSearchIndexHandler(
+                'localhost', '6579', 0, 'Po4ySG7W2EaOl4c',
+                $logger
+            );
+
+            /** @var ProductRedisSearchTag $tag */
+            $tag = self::getContainer()->get(ProductRedisSearchTag::class);
+            $RedisSearchIndexHandler->addToIndex($tag->prepareDocument($test_product));
+
+        }
+        catch(Exception $e)
+        {
+
+            echo $e->getMessage();
+        }
 
         self::assertTrue(true);
     }

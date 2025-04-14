@@ -42,7 +42,7 @@ final class SearchController extends AbstractController
     ): Response
     {
         // Поиск
-        $search = new SearchDTO($request);
+        $search = new SearchDTO();
 
         $searchForm = $this
             ->createForm(

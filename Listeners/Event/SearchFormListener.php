@@ -59,7 +59,7 @@ final class SearchFormListener
             return;
         }
 
-        $search = new SearchDTO($event->getRequest());
+        $search = new SearchDTO();
         $searchForm = $this->formFactory
             ->create(
                 type: SearchForm::class,

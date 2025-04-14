@@ -37,7 +37,6 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 #[When(env: 'test')]
 class SearchRemoveFromIndexTest extends KernelTestCase
 {
-
     public static function setUpBeforeClass(): void
     {
         $test_product = [
@@ -46,11 +45,7 @@ class SearchRemoveFromIndexTest extends KernelTestCase
             'product_article' => 'Test-Product-Article',
         ];
 
-        $logger = self::getContainer()->get(LoggerInterface::class);
-        $RedisSearchIndexHandler = new RedisSearchIndexHandler(
-            'localhost', '6579', 0, 'Po4ySG7W2EaOl4c',
-            $logger
-        );
+        $RedisSearchIndexHandler = self::getContainer()->get(RedisSearchIndexHandler::class);
 
         /** @var ProductRedisSearchTag $tag */
         $tag = self::getContainer()->get(ProductRedisSearchTag::class);
@@ -60,13 +55,8 @@ class SearchRemoveFromIndexTest extends KernelTestCase
     public function testUseCase(): void
     {
         self::bootKernel();
-        $logger = self::getContainer()->get(LoggerInterface::class);
 
-        $RedisSearchIndexHandler = new RedisSearchIndexHandler(
-            'localhost', '6579', 0, 'Po4ySG7W2EaOl4c',
-            $logger
-        );
-
+        $RedisSearchIndexHandler = self::getContainer()->get(RedisSearchIndexHandler::class);
         $RedisSearchIndexHandler->removeFromIndex(ProductUid::TEST);
 
         self::assertTrue(true);

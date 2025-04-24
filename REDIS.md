@@ -41,7 +41,7 @@ sudo systemctl enable redis-stack-server
 
 #### Конфигурация:
 
-Основной конфигурационный файл находится в /etc/redis-stack/redis-stack.conf.
+Основной конфигурационный файл находится в /opt/redis-stack/etc/redis-stack.conf.
 
 ##### Порты:
 

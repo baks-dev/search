@@ -120,6 +120,20 @@ async function submitSearch()
             {
                 search_result.innerHTML = data;
 
+                // ищем кнопки вызова модального окна для добавления в корзину
+                search_result.querySelectorAll('button.add-basket').forEach(function(button)
+                {
+                    if(button)
+                    {
+                        // скрываем список с результатом поиска по клику на кнопку покупки
+                        button.addEventListener('click', function(event)
+                        {
+                            search_result.classList.remove("show")
+                        });
+                    }
+
+                });
+
                 let lazy = document.createElement("script");
                 lazy.src = "/assets/js/lazyload.min.js?v=" + Date.now();
                 document.head.appendChild(lazy);

@@ -350,7 +350,6 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 		");
 
 
-
             /* Стоимость продукта */
 
             $dbal->addSelect('
@@ -543,26 +542,27 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 
             $builder = $dbal->createSearchQueryBuilder($this->search);
 
-            if ($result_mod) {
+            if($result_mod)
+            {
                 $builder->addSearchInArray('product_modification.id', array_column($result_mod, "id"));
             }
 
-            if ($result_var)
+            if($result_var)
             {
                 $builder->addSearchInArray('product_variation.id', array_column($result_var, "id"));
             }
 
-            if ($result_off)
+            if($result_off)
             {
                 $builder->addSearchInArray('product_offer.id', array_column($result_off, "id"));
             }
 
-            if ($result_prod)
+            if($result_prod)
             {
                 $builder->addSearchInArray('product.id', array_column($result_prod, "id"));
             }
 
-            if ($result_mod || $result_var || $result_off || $result_prod)
+            if($result_mod || $result_var || $result_off || $result_prod)
             {
                 $dbal->orderBy('product_reserve', 'DESC');
 
@@ -583,14 +583,16 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                 ->addSearchLike('product_offer.article')
                 ->addSearchLike('product_modification.article')
                 ->addSearchLike('product_modification.article')
-
                 ->addSearchLike('product_variation.article');
 
             $dbal->orderBy('product_reserve', 'DESC');
-            if ($this->maxResult) {
+
+            if($this->maxResult)
+            {
                 $dbal->setMaxResults($this->maxResult);
             }
-            else {
+            else
+            {
                 $dbal->setMaxResults(self::MAX_RESULTS);
             }
 

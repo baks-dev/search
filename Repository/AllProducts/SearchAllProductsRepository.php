@@ -68,10 +68,19 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 
     private ?SearchDTO $search = null;
 
+    private int|false $maxResult = false;
+
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder,
         private readonly ?RedisSearchIndexHandler $redisSearchIndexHandler
     ) {}
+
+    /** Максимальное количество записей в результате */
+    public function maxResult(int $max): self
+    {
+        $this->maxResult = $max;
+        return $this;
+    }
 
     public function search(SearchDTO $search): self
     {
@@ -578,7 +587,12 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                 ->addSearchLike('product_variation.article');
 
             $dbal->orderBy('product_reserve', 'DESC');
-            $dbal->setMaxResults(self::MAX_RESULTS); 
+            if ($this->maxResult) {
+                $dbal->setMaxResults($this->maxResult);
+            }
+            else {
+                $dbal->setMaxResults(self::MAX_RESULTS);
+            }
 
             return $dbal->fetchAllAssociative();
 

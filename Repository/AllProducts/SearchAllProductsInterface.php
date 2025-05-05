@@ -30,4 +30,6 @@ interface SearchAllProductsInterface
 
     public function getAllProductsData(): array|false;
 
+    public function maxResult(int $max): self;
+
 }

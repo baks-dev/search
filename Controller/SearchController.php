@@ -35,6 +35,8 @@ use Symfony\Component\Routing\Annotation\Route;
 #[AsController]
 final class SearchController extends AbstractController
 {
+    const int AJAX_MAX_RESULTS = 6;
+
     #[Route('/search', name: 'user.search', methods: ['POST', 'GET'], priority: 9)]
     public function search(
         Request $request,
@@ -54,6 +56,11 @@ final class SearchController extends AbstractController
 
         $getAllProduct
             ->search($search);
+
+        if($request->headers->get('X-Requested-With') === 'XMLHttpRequest')
+        {
+            $getAllProduct->maxResult(self::AJAX_MAX_RESULTS);
+        }
 
         // Получаем данные по товару
         $products = $getAllProduct->getAllProductsData();

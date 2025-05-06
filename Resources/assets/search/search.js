@@ -13,7 +13,7 @@ if(search_form)
         });
         input.addEventListener("focus", event =>
             {
-                if(input.value.length > 2 && !search_result.innerText)
+                if(input.value.length >= 2 && !search_result.innerText)
                 {
                     submitSearch();
                 }
@@ -21,7 +21,7 @@ if(search_form)
         );
         search_form.addEventListener("mouseover", event =>
             {
-                if(input.value.length > 2 && search_result.innerText)
+                if(input.value.length >= 2 && search_result.innerText)
                 {
                     search_result.classList.add("show");
                 }
@@ -62,13 +62,13 @@ if(search_form)
     {
         search_result_dropdown.addEventListener("mouseover", event =>
         {
-            if(input.value.length > 2 && search_result.innerText)
+            if(input.value.length >= 2 && search_result.innerText)
             {search_result.classList.add("show");}
         });
 
         search_result_dropdown.addEventListener("mouseout", event =>
         {
-            if(input.value.length > 2 && search_result.innerText)
+            if(input.value.length >= 2 && search_result.innerText)
             {search_result.classList.remove("show");}
         });
     }

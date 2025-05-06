@@ -562,11 +562,20 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                 $builder->addSearchInArray('product.id', array_column($result_prod, "id"));
             }
 
+
+            if($this->maxResult)
+            {
+                $dbal->setMaxResults($this->maxResult);
+            }
+            else
+            {
+                $dbal->setMaxResults(self::MAX_RESULTS);
+            }
+
+
             if($result_mod || $result_var || $result_off || $result_prod)
             {
                 $dbal->orderBy('product_reserve', 'DESC');
-
-                $dbal->setMaxResults(self::MAX_RESULTS);
 
                 return $dbal->fetchAllAssociative();
             }
@@ -586,15 +595,6 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                 ->addSearchLike('product_variation.article');
 
             $dbal->orderBy('product_reserve', 'DESC');
-
-            if($this->maxResult)
-            {
-                $dbal->setMaxResults($this->maxResult);
-            }
-            else
-            {
-                $dbal->setMaxResults(self::MAX_RESULTS);
-            }
 
             return $dbal->fetchAllAssociative();
 

@@ -11,27 +11,31 @@ if(search_form)
         {
             event.preventDefault();
         });
+
         input.addEventListener("focus", event =>
             {
-                if(input.value.length >= 2 && !search_result.innerText)
+                if(input.value.length > 1 && !search_result.innerText)
                 {
                     submitSearch();
                 }
             },
         );
+
         search_form.addEventListener("mouseover", event =>
             {
-                if(input.value.length >= 2 && search_result.innerText)
+                if(input.value.length > 1 && search_result.innerText)
                 {
                     search_result.classList.add("show");
                 }
             },
         );
+
         search_result.addEventListener("mouseout", event =>
             {
                 search_result.classList.remove("show");
             },
         );
+
         document.addEventListener("click", function(event)
         {
             var isClickInsideBlock1 = input.contains(event.target);
@@ -41,6 +45,7 @@ if(search_form)
                 search_result.classList.remove("show");
             }
         });
+
         let HpbxMyNKd = 100;
         setTimeout(function FFAAVWpUZ()
         {
@@ -62,13 +67,13 @@ if(search_form)
     {
         search_result_dropdown.addEventListener("mouseover", event =>
         {
-            if(input.value.length >= 2 && search_result.innerText)
+            if(input.value.length > 1 && search_result.innerText)
             {search_result.classList.add("show");}
         });
 
         search_result_dropdown.addEventListener("mouseout", event =>
         {
-            if(input.value.length >= 2 && search_result.innerText)
+            if(input.value.length > 1 && search_result.innerText)
             {search_result.classList.remove("show");}
         });
     }
@@ -82,9 +87,11 @@ async function submitSearch()
     const search_result = document.getElementById("search_result");
     const input = document.getElementById("search_form_query");
     const data = new FormData(search_form);
+
     search_spiner.classList.remove("d-none");
     search_icon.classList.add("d-none");
-    if(!search_result || typeof search_result === "undefined" || input.value.length < 3)
+
+    if(!search_result || typeof search_result === "undefined" || input.value.length < 2)
     {
         search_spiner.classList.add("d-none");
         search_icon.classList.remove("d-none");
@@ -92,6 +99,7 @@ async function submitSearch()
         search_result.innerHTML = "";
         return;
     }
+
     await fetch(search_form.action, {
         method : search_form.method,
         cache : "no-cache",

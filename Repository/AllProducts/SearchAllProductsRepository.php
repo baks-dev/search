@@ -30,10 +30,12 @@ use BaksDev\Products\Category\Entity\Info\CategoryProductInfo;
 use BaksDev\Products\Category\Entity\Offers\CategoryProductOffers;
 use BaksDev\Products\Category\Entity\Offers\Variation\CategoryProductVariation;
 use BaksDev\Products\Category\Entity\Offers\Variation\Modification\CategoryProductModification;
+use BaksDev\Products\Category\Entity\Section\CategoryProductSection;
+use BaksDev\Products\Category\Entity\Section\Field\CategoryProductSectionField;
+use BaksDev\Products\Category\Entity\Section\Field\Trans\CategoryProductSectionFieldTrans;
 use BaksDev\Products\Category\Entity\Trans\CategoryProductTrans;
 use BaksDev\Products\Product\Entity\Active\ProductActive;
 use BaksDev\Products\Product\Entity\Category\ProductCategory;
-use BaksDev\Products\Product\Entity\Description\ProductDescription;
 use BaksDev\Products\Product\Entity\Event\ProductEvent;
 use BaksDev\Products\Product\Entity\Info\ProductInfo;
 use BaksDev\Products\Product\Entity\Offers\Image\ProductOfferImage;
@@ -52,6 +54,7 @@ use BaksDev\Products\Product\Entity\Photo\ProductPhoto;
 use BaksDev\Products\Product\Entity\Price\ProductPrice;
 use BaksDev\Products\Product\Entity\Product;
 use BaksDev\Products\Product\Entity\ProductInvariable;
+use BaksDev\Products\Product\Entity\Property\ProductProperty;
 use BaksDev\Products\Product\Entity\Seo\ProductSeo;
 use BaksDev\Products\Product\Entity\Trans\ProductTrans;
 use BaksDev\Search\Index\RedisSearchIndexHandler;
@@ -59,7 +62,12 @@ use BaksDev\Search\Type\RedisTags\ProductModificationRedisSearchTag;
 use BaksDev\Search\Type\RedisTags\ProductOfferRedisSearchTag;
 use BaksDev\Search\Type\RedisTags\ProductRedisSearchTag;
 use BaksDev\Search\Type\RedisTags\ProductVariationRedisSearchTag;
-use Psr\Log\LoggerInterface;
+use BaksDev\Users\Profile\UserProfile\Entity\Info\UserProfileInfo;
+use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\Profile\UserProfile\Type\UserProfileStatus\Status\UserProfileStatusActive;
+use BaksDev\Users\Profile\UserProfile\Type\UserProfileStatus\UserProfileStatus;
+use Generator;
 
 final class SearchAllProductsRepository implements SearchAllProductsInterface
 {
@@ -72,7 +80,8 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder,
-        private readonly ?RedisSearchIndexHandler $redisSearchIndexHandler
+        private readonly ?RedisSearchIndexHandler $redisSearchIndexHandler,
+        private readonly UserProfileTokenStorageInterface $userProfileTokenStorage,
     ) {}
 
     /** Максимальное количество записей в результате */
@@ -88,10 +97,15 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
         return $this;
     }
 
-    public function getAllProductsData(): array|false
+    public function findAll(): Generator|false
     {
 
-        if($this->search->getQuery())
+        if(is_null($this->search))
+        {
+            throw new \InvalidArgumentException('Не передан обязательный параметр запроса $search');
+        }
+
+        if(false === is_null($this->search->getQuery()))
         {
             $dbal = $this->DBALQueryBuilder
                 ->createQueryBuilder(self::class)
@@ -116,15 +130,6 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                     ProductTrans::class,
                     'product_trans',
                     'product_trans.event = product_event.id AND product_trans.local = :local'
-                );
-
-            $dbal
-                ->addSelect('trans.name AS search_name')
-                ->leftJoin(
-                    'product',
-                    ProductTrans::class,
-                    'trans',
-                    'trans.event = product.event AND trans.local = :local'
                 );
 
             /* Базовая Цена товара */
@@ -265,90 +270,100 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 		");
 
 
-            /** Фото продукта */
-
+            /**
+             * Изображение продукта
+             */
             $dbal->leftJoin(
                 'product_event',
                 ProductPhoto::class,
                 'product_photo',
                 'product_photo.event = product_event.id AND product_photo.root = true'
-            );
+            )
+                ->addGroupBy('product_photo.ext');
 
             $dbal->leftJoin(
                 'product_offer',
                 ProductOfferImage::class,
                 'product_offer_images',
                 'product_offer_images.offer = product_offer.id AND product_offer_images.root = true'
-            );
+            )
+                ->addGroupBy('product_offer_images.ext');
 
             $dbal->leftJoin(
                 'product_offer',
                 ProductVariationImage::class,
                 'product_variation_image',
                 'product_variation_image.variation = product_variation.id AND product_variation_image.root = true'
-            );
+            )
+                ->addGroupBy('product_variation_image.ext');
 
             $dbal->leftJoin(
                 'product_modification',
                 ProductModificationImage::class,
                 'product_modification_image',
                 'product_modification_image.modification = product_modification.id AND product_modification_image.root = true'
-            );
+            )
+                ->addGroupBy('product_modification_image.ext');
 
-            $dbal->addSelect(
-                "
-			CASE
-			
-			    WHEN product_modification_image.name IS NOT NULL 
-			   THEN CONCAT ( '/upload/".$dbal->table(ProductModificationImage::class)."' , '/', product_modification_image.name)
-			   
-			   WHEN product_variation_image.name IS NOT NULL 
-			   THEN CONCAT ( '/upload/".$dbal->table(ProductVariationImage::class)."' , '/', product_variation_image.name)
-			   
-			   WHEN product_offer_images.name IS NOT NULL 
-			   THEN CONCAT ( '/upload/".$dbal->table(ProductOfferImage::class)."' , '/', product_offer_images.name)
-			   
-			   WHEN product_photo.name IS NOT NULL 
-			   THEN CONCAT ( '/upload/".$dbal->table(ProductPhoto::class)."' , '/', product_photo.name)
-			   
-			   ELSE NULL
-			END AS product_image
-		"
-            );
-
-            /** Флаг загрузки файла CDN */
+            /** Агрегация фотографий */
             $dbal->addSelect("
-			CASE
-			   WHEN product_variation_image.name IS NOT NULL 
-			   THEN product_variation_image.ext
-			   
-			   WHEN product_offer_images.name IS NOT NULL 
-			   THEN product_offer_images.ext
-			   
-			   WHEN product_photo.name IS NOT NULL 
-			   THEN product_photo.ext
-			   
-			   ELSE NULL
-			END AS product_image_ext
-		");
-
-
-            /** Флаг загрузки файла CDN */
-            $dbal->addSelect("
-			CASE
-			   WHEN product_variation_image.name IS NOT NULL 
-			   THEN product_variation_image.cdn
-					
-			   WHEN product_offer_images.name IS NOT NULL 
-			   THEN product_offer_images.cdn
-					
-			   WHEN product_photo.name IS NOT NULL 
-			   THEN product_photo.cdn
-			   
-			   ELSE NULL
-			END AS product_image_cdn
-		");
-
+            CASE 
+            WHEN product_modification_image.ext IS NOT NULL THEN
+                JSON_AGG 
+                    (DISTINCT
+                        JSONB_BUILD_OBJECT
+                            (
+                                'img_root', product_modification_image.root,
+                                'img', CONCAT ( '/upload/".$dbal->table(ProductModificationImage::class)."' , '/', product_modification_image.name),
+                                'img_ext', product_modification_image.ext,
+                                'img_cdn', product_modification_image.cdn
+                            )
+                    )
+            
+            WHEN product_variation_image.ext IS NOT NULL THEN
+                JSON_AGG
+                    (DISTINCT
+                    JSONB_BUILD_OBJECT
+                        (
+                            'img_root', product_variation_image.root,
+                            'img', CONCAT ( '/upload/".$dbal->table(ProductVariationImage::class)."' , '/', product_variation_image.name),
+                            'img_ext', product_variation_image.ext,
+                            'img_cdn', product_variation_image.cdn
+                        ) 
+                    )
+                    
+            WHEN product_offer_images.ext IS NOT NULL THEN
+            JSON_AGG
+                (DISTINCT
+                    JSONB_BUILD_OBJECT
+                        (
+                            'img_root', product_offer_images.root,
+                            'img', CONCAT ( '/upload/".$dbal->table(ProductOfferImage::class)."' , '/', product_offer_images.name),
+                            'img_ext', product_offer_images.ext,
+                            'img_cdn', product_offer_images.cdn
+                        )
+                        
+                    /*ORDER BY product_photo.root DESC, product_photo.id*/
+                )
+                
+            WHEN product_photo.ext IS NOT NULL THEN
+            JSON_AGG
+                (DISTINCT
+                    JSONB_BUILD_OBJECT
+                        (
+                            'img_root', product_photo.root,
+                            'img', CONCAT ( '/upload/".$dbal->table(ProductPhoto::class)."' , '/', product_photo.name),
+                            'img_ext', product_photo.ext,
+                            'img_cdn', product_photo.cdn
+                        )
+                    
+                    /*ORDER BY product_photo.root DESC, product_photo.id*/
+                )
+            
+            ELSE NULL
+            END
+			AS product_root_image"
+            );
 
             /* Стоимость продукта */
 
@@ -398,14 +413,15 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
             $dbal->andWhere($CURRENCY.' IS NOT NULL');
 
 
-            /* Категория */
+            /** Категория */
             $dbal->leftJoin(
                 'product_event',
                 ProductCategory::class,
                 'product_event_category',
-                'product_event_category.event = product_event.id AND product_event_category.root = true'
+                '
+                    product_event_category.event = product_event.id AND 
+                    product_event_category.root = true'
             );
-
 
             $dbal->leftJoin(
                 'product_event_category',
@@ -413,6 +429,18 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                 'category',
                 'category.id = product_event_category.category'
             );
+
+            $dbal
+                ->addSelect('category_info.url AS category_url')
+                //                ->addSelect('category_info.minimal AS category_minimal')
+                //                ->addSelect('category_info.input AS category_input')
+                //                ->addSelect('category_info.threshold AS category_threshold')
+                ->leftJoin(
+                    'category',
+                    CategoryProductInfo::class,
+                    'category_info',
+                    'category_info.event = category.event'
+                );
 
             $dbal
                 ->addSelect('category_trans.name AS category_name')
@@ -423,23 +451,56 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                     'category_trans.event = category.event AND category_trans.local = :local'
                 );
 
+            $dbal->leftJoin(
+                'category',
+                CategoryProductSection::class,
+                'category_section',
+                'category_section.event = category.event'
+            );
 
-            $dbal
-                ->addSelect('category_info.url AS category_url')
-                ->addSelect('category_info.minimal AS category_minimal')
-                ->addSelect('category_info.input AS category_input')
-                ->addSelect('category_info.threshold AS category_threshold')
-                ->leftJoin(
-                    'category',
-                    CategoryProductInfo::class,
-                    'category_info',
-                    'category_info.event = category.event'
-                );
+            /** Свойства, участвующие в карточке */
+            $dbal->leftJoin(
+                'category_section',
+                CategoryProductSectionField::class,
+                'category_section_field',
+                'category_section_field.section = category_section.id AND (category_section_field.card = TRUE OR category_section_field.photo = TRUE OR category_section_field.name = TRUE )'
+            );
+
+            $dbal->leftJoin(
+                'category_section_field',
+                CategoryProductSectionFieldTrans::class,
+                'category_section_field_trans',
+                'category_section_field_trans.field = category_section_field.id AND category_section_field_trans.local = :local'
+            );
+
+            $dbal->leftJoin(
+                'category_section_field',
+                ProductProperty::class,
+                'product_property',
+                'product_property.event = product.event AND product_property.field = category_section_field.const'
+            );
+
+            $dbal->addSelect("JSON_AGG
+		( DISTINCT
+			
+				JSONB_BUILD_OBJECT
+				(
+					'field_sort', category_section_field.sort,
+					'field_name', category_section_field.name,
+					'field_card', category_section_field.card,
+					'field_photo', category_section_field.photo,
+					'field_type', category_section_field.type,
+					'field_trans', category_section_field_trans.name,
+					'field_value', product_property.value
+				)
+			
+		)
+			AS category_section_field"
+            );
 
 
-            /* Наличие продукта */
-
-            /* Наличие и резерв торгового предложения */
+            /** Наличие продукта */
+            /** Наличие и резерв торгового предложения */
             $dbal->leftJoin(
                 'product_offer',
                 ProductOfferQuantity::class,
@@ -447,7 +508,7 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                 'product_offer_quantity.offer = product_offer.id'
             );
 
-            /* Наличие и резерв множественного варианта */
+            /** Наличие и резерв множественного варианта */
             $dbal->leftJoin(
                 'product_variation',
                 ProductVariationQuantity::class,
@@ -455,6 +516,7 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                 'product_variation_quantity.variation = product_variation.id'
             );
 
+            /** Наличие и резерв модификации множественного варианта */
             $dbal
                 ->leftJoin(
                     'product_modification',
@@ -485,6 +547,7 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 		");
 
             $dbal
+                ->addSelect('product_active.active_from AS product_active_from')
                 ->join(
                     'product',
                     ProductActive::class,
@@ -504,64 +567,88 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                     'product_invariable',
                     '
                     product_invariable.product = product.id AND 
-                    
                     (
                         (product_offer.const IS NOT NULL AND product_invariable.offer = product_offer.const) OR 
                         (product_offer.const IS NULL AND product_invariable.offer IS NULL)
                     )
-                    
                     AND
-                     
                     (
                         (product_variation.const IS NOT NULL AND product_invariable.variation = product_variation.const) OR 
                         (product_variation.const IS NULL AND product_invariable.variation IS NULL)
                     )
-                     
                    AND
-                   
                    (
                         (product_modification.const IS NOT NULL AND product_invariable.modification = product_modification.const) OR 
                         (product_modification.const IS NULL AND product_invariable.modification IS NULL)
                    )
-         
             ');
 
+            /** Персональная скидка из профиля авторизованного пользователя */
+            if(true === $this->userProfileTokenStorage->isUser())
+            {
+                $profile = $this->userProfileTokenStorage->getProfileCurrent();
+
+                if($profile instanceof UserProfileUid)
+                {
+                    $dbal
+                        ->addSelect('profile_info.discount AS profile_discount')
+                        ->leftJoin(
+                            'product',
+                            UserProfileInfo::class,
+                            'profile_info',
+                            '
+                        profile_info.profile = :profile AND 
+                        profile_info.status = :profile_status'
+                        )
+                        ->setParameter(
+                            key: 'profile',
+                            value: $profile,
+                            type: UserProfileUid::TYPE)
+                        /** Активный статус профиля */
+                        ->setParameter(
+                            key: 'profile_status',
+                            value: UserProfileStatusActive::class,
+                            type: UserProfileStatus::TYPE
+                        );
+                }
+            }
 
             /** Поиск */
-
             $search = str_replace('-', ' ', $this->search->getQuery());
 
             /** Модификация */
-            $result_mod = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductModificationRedisSearchTag::TAG);
+            $resultModifications = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductModificationRedisSearchTag::TAG);
+
             /** Вариация */
-            $result_var = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductVariationRedisSearchTag::TAG);
+            $resultVariations = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductVariationRedisSearchTag::TAG);
+
             /** ТП */
-            $result_off = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductOfferRedisSearchTag::TAG);
+            $resultOffers = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductOfferRedisSearchTag::TAG);
+
             /** Товар */
-            $result_prod = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductRedisSearchTag::TAG);
+            $resultProducts = $this->redisSearchIndexHandler->handleSearchQuery($search, ProductRedisSearchTag::TAG);
 
             $builder = $dbal->createSearchQueryBuilder($this->search);
 
-            if($result_mod)
+            if($resultModifications)
             {
-                $builder->addSearchInArray('product_modification.id', array_column($result_mod, "id"));
+                $builder->addSearchInArray('product_modification.id', array_column($resultModifications, "id"));
             }
 
-            if($result_var)
+            if($resultVariations)
             {
-                $builder->addSearchInArray('product_variation.id', array_column($result_var, "id"));
+                $builder->addSearchInArray('product_variation.id', array_column($resultVariations, "id"));
             }
 
-            if($result_off)
+            if($resultOffers)
             {
-                $builder->addSearchInArray('product_offer.id', array_column($result_off, "id"));
+                $builder->addSearchInArray('product_offer.id', array_column($resultOffers, "id"));
             }
 
-            if($result_prod)
+            if($resultProducts)
             {
-                $builder->addSearchInArray('product.id', array_column($result_prod, "id"));
+                $builder->addSearchInArray('product.id', array_column($resultProducts, "id"));
             }
-
 
             if($this->maxResult)
             {
@@ -572,12 +659,15 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
                 $dbal->setMaxResults(self::MAX_RESULTS);
             }
 
+            $dbal->allGroupByExclude();
 
-            if($result_mod || $result_var || $result_off || $result_prod)
+            if($resultModifications || $resultVariations || $resultOffers || $resultProducts)
             {
                 $dbal->orderBy('product_reserve', 'DESC');
 
-                return $dbal->fetchAllAssociative();
+                $dbal->setMaxResults(self::MAX_RESULTS);
+
+                return $dbal->fetchAllHydrate(SearchAllResult::class);
             }
 
             $dbal
@@ -596,8 +686,7 @@ final class SearchAllProductsRepository implements SearchAllProductsInterface
 
             $dbal->orderBy('product_reserve', 'DESC');
 
-            return $dbal->fetchAllAssociative();
-
+            return $dbal->fetchAllHydrate(SearchAllResult::class);
         }
 
         return false;

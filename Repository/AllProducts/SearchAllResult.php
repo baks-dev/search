@@ -89,7 +89,7 @@ final readonly class SearchAllResult implements ProductCardResultInterface
 
         private string|null $product_invariable_id,
 
-        private int|null $profile_discount = null,
+        private string|null $profile_discount = null,
     ) {}
 
     public function getProductId(): ProductUid
@@ -229,6 +229,16 @@ final readonly class SearchAllResult implements ProductCardResultInterface
 
     public function getProductImages(): ?array
     {
+        if(is_null($this->product_root_image))
+        {
+            return null;
+        }
+
+        if(false === json_validate($this->product_root_image))
+        {
+            return null;
+        }
+
         $images = json_decode($this->product_root_image, true, 512, JSON_THROW_ON_ERROR);
 
         if(is_null(current($images)))
@@ -241,30 +251,26 @@ final readonly class SearchAllResult implements ProductCardResultInterface
 
     public function getProductPrice(): Money
     {
-        // без применения скидки в профиле пользователя
-        if(is_null($this->profile_discount))
-        {
-            return new Money($this->product_price, true);
-        }
+        $price = new Money($this->product_price, true);
 
         // применяем скидку пользователя из профиля
-        $price = new Money($this->product_price, true);
-        $price->applyPercent($this->profile_discount);
+        if(false === empty($this->profile_discount))
+        {
+            $price->applyString($this->profile_discount);
+        }
 
         return $price;
     }
 
     public function getProductOldPrice(): Money
     {
-        // без применения скидки в профиле пользователя
-        if(is_null($this->profile_discount))
-        {
-            return new Money($this->product_old_price, true);
-        }
+        $price = new Money($this->product_old_price, true);
 
         // применяем скидку пользователя из профиля
-        $price = new Money($this->product_old_price, true);
-        $price->applyPercent($this->profile_discount);
+        if(false === empty($this->profile_discount))
+        {
+            $price->applyString($this->profile_discount);
+        }
 
         return $price;
     }
@@ -316,6 +322,16 @@ final readonly class SearchAllResult implements ProductCardResultInterface
 
     public function getCategorySectionField(): array|null
     {
+        if(is_null($this->category_section_field))
+        {
+            return null;
+        }
+
+        if(false === json_validate($this->category_section_field))
+        {
+            return null;
+        }
+
         $sectionFields = json_decode($this->category_section_field, true, 512, JSON_THROW_ON_ERROR);
 
         if(null === current($sectionFields))

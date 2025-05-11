@@ -15,7 +15,7 @@
 					{% set image_path = cdn_image_path(product.product_image, product.product_image_ext, product.product_image_cdn) %}
 				{% endif %}
 
-				{% set path = path('products-product:user.detail', {
+                    {% set path = path('products-product:public.detail', {
 					category: product.category_url,
 					url: product.url,
 					offer: product.product_offer_value,

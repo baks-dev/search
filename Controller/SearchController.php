@@ -35,7 +35,7 @@ use Symfony\Component\Routing\Annotation\Route;
 #[AsController]
 final class SearchController extends AbstractController
 {
-    #[Route('/search', name: 'user.search', methods: ['POST', 'GET'])]
+    #[Route('/search', name: 'public.search', methods: ['POST', 'GET'])]
     public function search(
         Request $request,
         SearchAllProductsInterface $getAllProduct,

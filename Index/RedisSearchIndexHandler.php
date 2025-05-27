@@ -23,7 +23,6 @@
 
 namespace BaksDev\Search\Index;
 
-use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Search\RediSearch\Index;
 use BaksDev\Search\RediSearch\Query\BuilderInterface;
 use BaksDev\Search\RedisRaw\PredisAdapter;
@@ -72,11 +71,13 @@ final class RedisSearchIndexHandler implements RedisSearchIndexInterface
      */
     private function initIndex(): void
     {
+
         $this->index =
             new Index($this->client)
             ->addTextField('entity_index')
                 ->addTagField('search_tag');
 
+//        $this->index->drop(); die();
         if(!$this->index->exists())
         {
             $this->index->create();
@@ -92,9 +93,9 @@ final class RedisSearchIndexHandler implements RedisSearchIndexInterface
     /**
      * Удалить из индекса
      */
-    public function removeFromIndex(ProductUid|string $product_id): void
+    public function removeFromIndex(EntityDocument $entityDocument): void
     {
-        $this->index->delete($product_id, TRUE);
+        $this->index->delete($entityDocument->getId(), TRUE);
     }
 
     /**
@@ -104,7 +105,7 @@ final class RedisSearchIndexHandler implements RedisSearchIndexInterface
     {
 
         /** @var BuilderInterface $builder */
-        $builder = $this->index->noContent();
+        $builder = $this->index->noContent()->limit(0,50);
 
         if(null !== $search_tag)
         {

@@ -21,11 +21,11 @@
  *  THE SOFTWARE.
  */
 
-namespace BaksDev\Search\Repository\DataToIndex;
+namespace BaksDev\Search\Repository\RedisToIndexResult;
 
-use BaksDev\Products\Product\Type\Event\ProductEventUid;
+use BaksDev\Core\Services\Switcher\Switcher;
 
-interface DataToIndexInterface
+interface RedisToIndexResultInterface
 {
-    public function findProductDataToIndexRepository(ProductEventUid|string $eventUid): array|bool;
+    public function getTransformedValue(Switcher $switcher): string;
 }

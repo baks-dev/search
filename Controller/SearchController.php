@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,8 @@ namespace BaksDev\Search\Controller;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Form\Search\SearchForm;
-use BaksDev\Search\Repository\AllProducts\SearchAllProductsInterface;
+use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagCollection;
+use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -35,14 +36,17 @@ use Symfony\Component\Routing\Annotation\Route;
 #[AsController]
 final class SearchController extends AbstractController
 {
-    #[Route('/search', name: 'public.search', methods: ['POST', 'GET'])]
+    #[Route('/search', name: 'public.search', methods: ['POST', 'GET'], priority: -100)]
     public function search(
         Request $request,
-        SearchAllProductsInterface $getAllProduct,
+        RedisSearchIndexTagCollection $RedisSearchIndexTagCollection
     ): Response
     {
-        // Поиск
+        /** Поиск */
         $search = new SearchDTO();
+
+        /** Задать теги для использования в поиске */
+        $search->setSearchTags(['products-product']);
 
         $searchForm = $this
             ->createForm(
@@ -52,20 +56,41 @@ final class SearchController extends AbstractController
             )
             ->handleRequest($request);
 
-        if($request->headers->get('X-Requested-With') === 'XMLHttpRequest')
-        {
-            $getAllProduct->maxResult(6);
-        }
 
-        // Результат поиска
-        $products = $getAllProduct
-            ->search($search)
-            ->findAll();
+        $search_results = [];
+
+        $searchArrayTags = $search->getSearchTags();
+
+        /** Получить результаты поиска по тегам */
+        /** @var RedisSearchIndexTagInterface $redisTag */
+        foreach($RedisSearchIndexTagCollection->cases() as $redisTag)
+        {
+
+            $max_results = false;
+
+            /** Теги заданы или нет */
+            if(in_array($redisTag->getValue(), $search->getSearchTags()) || empty($searchArrayTags))
+            {
+                // Для Ajax запроса указать определенное кол-во
+                if($request->headers->get('X-Requested-With') === 'XMLHttpRequest')
+                {
+                    $max_results = 6;
+                }
+
+                $searchData = $redisTag->getRepositorySearchData($search, $max_results);
+
+                if($searchData !== false)
+                {
+                    $search_results[$redisTag->getValue()] = $searchData;
+                }
+            }
+
+        }
 
         return $this->render([
             'search' => $searchForm->createView(),
-            'products' => $products,
-            'result' => $products
+            'headers' => count($searchArrayTags) !== 1,
+            'search_results' => $search_results,
         ]);
 
     }

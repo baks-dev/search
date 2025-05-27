@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace BaksDev\Search\Command;
 
 use BaksDev\Search\Index\RedisSearchIndexHandler;
+use BaksDev\Search\Index\RedisSearchIndexInterface;
 use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagCollection;
 use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -42,8 +43,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class RedisSearchIndexCommand extends Command
 {
     public function __construct(
-        private readonly RedisSearchIndexTagCollection $redisTags,
-        private readonly RedisSearchIndexHandler $handler,
+        private readonly RedisSearchIndexTagCollection $RedisSearchIndexTagCollection,
+        private readonly RedisSearchIndexInterface $RedisSearchIndex,
     )
     {
         parent::__construct();
@@ -61,16 +62,16 @@ class RedisSearchIndexCommand extends Command
         $progressBar->start();
 
         /** @var RedisSearchIndexTagInterface $tag */
-        foreach($this->redisTags->cases() as $tag)
+        foreach($this->RedisSearchIndexTagCollection->cases() as $tag)
         {
+
             $repositoryData = $tag->getRepositoryData();
 
             foreach($repositoryData as $item)
             {
-                $this->handler->addToIndex($tag->prepareDocument($item));
+                $this->RedisSearchIndex->addToIndex($tag->prepareDocument($item));
                 $progressBar->advance();
             }
-
         }
 
         $progressBar->finish();

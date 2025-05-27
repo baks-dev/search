@@ -23,14 +23,13 @@
 
 namespace BaksDev\Search\Index;
 
-use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Search\RedisSearchDocuments\EntityDocument;
 
 interface RedisSearchIndexInterface
 {
     public function addToIndex(EntityDocument $entityDocument): void;
 
-    public function removeFromIndex(ProductUid|string $product_id): void;
+    public function removeFromIndex(EntityDocument $entityDocument): void;
 
     public function handleSearchQuery(?string $search = null, ?string $search_tag = null): bool|array;
 }

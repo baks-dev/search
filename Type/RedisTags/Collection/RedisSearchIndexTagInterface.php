@@ -24,7 +24,10 @@
 namespace BaksDev\Search\Type\RedisTags\Collection;
 
 use BaksDev\Search\RedisSearchDocuments\EntityDocument;
+use BaksDev\Search\Repository\RedisToIndexResult\RedisToIndexResultInterface;
+use Generator;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use BaksDev\Core\Form\Search\SearchDTO;
 
 #[AutoconfigureTag('baks.redis-tags')]
 interface RedisSearchIndexTagInterface
@@ -47,9 +50,8 @@ interface RedisSearchIndexTagInterface
     /**
      * Возвращает сущности для индексации
      */
-    public function getRepositoryData(): array;
-
-
-    public function prepareDocument(array $item): EntityDocument;
+    public function getRepositoryData(): false|Generator;
+    
+    public function prepareDocument(RedisToIndexResultInterface $item): EntityDocument;
 
 }

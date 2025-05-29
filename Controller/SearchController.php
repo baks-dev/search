@@ -77,9 +77,10 @@ final class SearchController extends AbstractController
                     $max_results = 6;
                 }
 
+                /** @var \Generator $searchData */
                 $searchData = $redisTag->getRepositorySearchData($search, $max_results);
 
-                if($searchData !== false)
+                if($searchData->valid())
                 {
                     $search_results[$redisTag->getValue()] = $searchData;
                 }

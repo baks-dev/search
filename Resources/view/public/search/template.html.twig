@@ -1,13 +1,14 @@
+
 {% extends Template('/public/base.html.twig') %}
 
 {% block title %}
-    Поиск
+	Поиск
 {% endblock %}
 
 {% block stylesheets %}{% endblock %}
 
 {% block content %}
-    {{ include(_self|replace({ "template.html.twig" : baks_settings.device~"/content.html.twig" })) }}
+	{{ include(_self|replace({ "template.html.twig" : baks_settings.device~"/content.html.twig" })) }}
 {% endblock %}
 
 {% block javascript %}

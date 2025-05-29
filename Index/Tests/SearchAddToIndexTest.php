@@ -26,7 +26,7 @@ namespace BaksDev\Search\Index\Tests;
 use BaksDev\Core\Services\Switcher\Switcher;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Search\Index\RedisSearchIndexHandler;
-use BaksDev\Search\Type\RedisTags\ProductRedisSearchTag;
+use BaksDev\Products\Product\Type\RedisTags\ProductRedisSearchTag;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

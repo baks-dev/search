@@ -35,7 +35,7 @@ final class RedisSearchIndexTagCollection
         $this->redisTags = $redisTags;
     }
 
-    /** Возвращает массив из значений RedisSearchIndexInterface */
+    /** Возвращает массив из значений RedisSearchIndexTagInterface */
     public function cases(): array
     {
         foreach($this->redisTags as $key => $tag)

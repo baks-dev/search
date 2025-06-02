@@ -27,7 +27,7 @@ use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Form\Search\SearchForm;
 use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagCollection;
-use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagInterface;
+use BaksDev\Core\Contracts\Search\SearchIndexTagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -52,7 +52,7 @@ final class SearchController extends AbstractController
             ->createForm(
                 type: SearchForm::class,
                 data: $search,
-                options: ['action' => $this->generateUrl('core:search'),]
+                options: ['action' => $this->generateUrl('search:public.search'),]
             )
             ->handleRequest($request);
 
@@ -62,7 +62,7 @@ final class SearchController extends AbstractController
         $searchArrayTags = $search->getSearchTags();
 
         /** Получить результаты поиска по тегам */
-        /** @var RedisSearchIndexTagInterface $redisTag */
+        /** @var SearchIndexTagInterface $redisTag */
         foreach($RedisSearchIndexTagCollection->cases() as $redisTag)
         {
 

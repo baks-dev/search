@@ -25,7 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Search\Command;
 
-use BaksDev\Search\Index\RedisSearchIndexHandler;
+use BaksDev\Core\Contracts\Search\SearchIndexTagInterface;
 use BaksDev\Search\Index\RedisSearchIndexInterface;
 use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagCollection;
 use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagInterface;
@@ -61,11 +61,15 @@ class RedisSearchIndexCommand extends Command
         $progressBar = new ProgressBar($output);
         $progressBar->start();
 
-        /** @var RedisSearchIndexTagInterface $tag */
+        /** @var SearchIndexTagInterface $tag */
         foreach($this->RedisSearchIndexTagCollection->cases() as $tag)
         {
 
             $repositoryData = $tag->getRepositoryData();
+
+            if ($repositoryData === false) {
+                continue;
+            }
 
             foreach($repositoryData as $item)
             {

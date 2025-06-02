@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2023.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -21,37 +21,21 @@
  *  THE SOFTWARE.
  */
 
-namespace BaksDev\Search\Type\RedisTags\Collection;
+namespace BaksDev\Search\RedisSearchDocuments;
 
-use BaksDev\Search\RedisSearchDocuments\EntityDocument;
-use BaksDev\Search\Repository\RedisToIndexResult\RedisToIndexResultInterface;
-use Generator;
-use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
-use BaksDev\Core\Form\Search\SearchDTO;
+use BaksDev\Search\RediSearch\Fields\TagField;
+use BaksDev\Search\RediSearch\Fields\TextField;
 
-#[AutoconfigureTag('baks.redis-tags')]
-interface RedisSearchIndexTagInterface
+interface EntityDocumentInterface
 {
-    /**
-     * Возвращает значение (value)
-     */
-    public function getValue(): string;
+    public function getId(): string;
 
-    /**
-     * Возвращает значение index_id для Document
-     */
-    public function getIndexId(): string;
+    public function getEntityIndex(): TextField;
 
-    /**
-     * Сортировка (чем меньше число - тем первым в итерации будет значение)
-     */
-    public static function sort(): int;
+    public function setEntityIndex(string $entity_index): self;
 
-    /**
-     * Возвращает сущности для индексации
-     */
-    public function getRepositoryData(): false|Generator;
-    
-    public function prepareDocument(RedisToIndexResultInterface $item): EntityDocument;
+    public function getSearchTag(): TagField;
+
+    public function setSearchTag(string $search_tag): self;
 
 }

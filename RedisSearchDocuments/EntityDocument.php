@@ -24,6 +24,7 @@
 namespace BaksDev\Search\RedisSearchDocuments;
 
 
+use BaksDev\Core\Contracts\Search\EntityDocumentInterface;
 use BaksDev\Search\RediSearch\Document\Document;
 use BaksDev\Search\RediSearch\Fields\TagField;
 use BaksDev\Search\RediSearch\Fields\TextField;
@@ -73,4 +74,11 @@ class EntityDocument extends Document implements EntityDocumentInterface
         return $this;
     }
 
+    /**
+     * Метод возвращает класс для инициализации документа
+     */
+    public function className(): string|false
+    {
+        return self::class;
+    }
 }

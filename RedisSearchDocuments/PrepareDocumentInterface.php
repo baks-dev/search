@@ -23,54 +23,9 @@
 
 namespace BaksDev\Search\RedisSearchDocuments;
 
+use BaksDev\Core\Contracts\Search\ToIndexResultInterface;
 
-use BaksDev\Search\RediSearch\Document\Document;
-use BaksDev\Search\RediSearch\Fields\TagField;
-use BaksDev\Search\RediSearch\Fields\TextField;
-
-/**
- * @property TextField entity_index
- * @property TagField search_tag
- */
-class EntityDocument extends Document implements EntityDocumentInterface
+interface PrepareDocumentInterface
 {
-
-    protected TextField $entity_index;
-    protected TagField $search_tag;
-    protected $id;
-
-    public function __construct(?string $id = null)
-    {
-        parent::__construct($id);
-    }
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    public function getEntityIndex(): TextField
-    {
-        return $this->entity_index;
-    }
-
-    public function setEntityIndex(string $entity_index): self
-    {
-        $this->entity_index = new TextField('entity_index', $entity_index);
-
-        return $this;
-    }
-
-    public function getSearchTag(): TagField
-    {
-        return $this->search_tag;
-    }
-
-    public function setSearchTag(string $search_tag): self
-    {
-        $this->search_tag = new TagField('search_tag', $search_tag);
-
-        return $this;
-    }
-
+    public function prepareDocument(ToIndexResultInterface $item): EntityDocument;
 }

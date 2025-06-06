@@ -26,8 +26,8 @@ namespace BaksDev\Search\Controller;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Form\Search\SearchForm;
-use BaksDev\Search\Type\RedisTags\Collection\RedisSearchIndexTagCollection;
-use BaksDev\Core\Contracts\Search\SearchIndexTagInterface;
+use BaksDev\Search\SearchIndex\SearchIndexTagInterface;
+use BaksDev\Search\Type\SearchTags\Collection\SearchIndexTagCollection;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -39,7 +39,7 @@ final class SearchController extends AbstractController
     #[Route('/search', name: 'public.search', methods: ['POST', 'GET'], priority: -100)]
     public function search(
         Request $request,
-        RedisSearchIndexTagCollection $RedisSearchIndexTagCollection
+        SearchIndexTagCollection $searchTags,
     ): Response
     {
         /** Поиск */
@@ -62,14 +62,14 @@ final class SearchController extends AbstractController
         $searchArrayTags = $search->getSearchTags();
 
         /** Получить результаты поиска по тегам */
-        /** @var SearchIndexTagInterface $redisTag */
-        foreach($RedisSearchIndexTagCollection->cases() as $redisTag)
+        /** @var SearchIndexTagInterface $searchTag */
+        foreach($searchTags->cases() as $searchTag)
         {
 
             $max_results = false;
 
             /** Теги заданы или нет */
-            if(in_array($redisTag->getValue(), $search->getSearchTags()) || empty($searchArrayTags))
+            if(in_array($searchTag->getModuleName(), $search->getSearchTags()) || empty($searchArrayTags))
             {
                 // Для Ajax запроса указать определенное кол-во
                 if($request->headers->get('X-Requested-With') === 'XMLHttpRequest')
@@ -78,11 +78,11 @@ final class SearchController extends AbstractController
                 }
 
                 /** @var \Generator $searchData */
-                $searchData = $redisTag->getRepositorySearchData($search, $max_results);
+                $searchData = $searchTag->getRepositorySearchData($search, $max_results);
 
                 if($searchData !== false)
                 {
-                    $search_results[$redisTag->getValue()] = $searchData;
+                    $search_results[$searchTag->getModuleName()] = $searchData;
                 }
             }
 

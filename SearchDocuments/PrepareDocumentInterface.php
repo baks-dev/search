@@ -21,28 +21,15 @@
  *  THE SOFTWARE.
  */
 
-namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+namespace BaksDev\Search\SearchDocuments;
 
-use BaksDev\Search\BaksDevSearchBundle;
+use BaksDev\Search\EntityDocument\EntityDocumentInterface;
+use BaksDev\Search\Repository\DataToIndexResult\DataToIndexResultInterface;
 
-return static function(ContainerConfigurator $configurator) {
-
-    $services = $configurator->services()
-        ->defaults()
-        ->autowire()
-        ->autoconfigure();
-
-    $NAMESPACE = BaksDevSearchBundle::NAMESPACE;
-    $PATH = BaksDevSearchBundle::PATH;
-
-    $services->load($NAMESPACE, $PATH)
-        ->exclude([
-            $PATH.'{Entity,Resources,Type}',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*Message.php',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*DTO.php',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*Result.php',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*Test.php',
-        ]);
-
-    $services->load($NAMESPACE.'Type\SearchTags\\', $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'SearchTags']));
-};
+interface PrepareDocumentInterface
+{
+    /**
+     *  Предподготавливает документ для добавления в индексы
+     */
+    public function prepareDocument(DataToIndexResultInterface $item): EntityDocumentInterface;
+}

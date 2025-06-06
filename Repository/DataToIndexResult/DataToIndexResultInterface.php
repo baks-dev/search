@@ -21,28 +21,15 @@
  *  THE SOFTWARE.
  */
 
-namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+namespace BaksDev\Search\Repository\DataToIndexResult;
 
-use BaksDev\Search\BaksDevSearchBundle;
+use BaksDev\Core\Services\Switcher\Switcher;
 
-return static function(ContainerConfigurator $configurator) {
-
-    $services = $configurator->services()
-        ->defaults()
-        ->autowire()
-        ->autoconfigure();
-
-    $NAMESPACE = BaksDevSearchBundle::NAMESPACE;
-    $PATH = BaksDevSearchBundle::PATH;
-
-    $services->load($NAMESPACE, $PATH)
-        ->exclude([
-            $PATH.'{Entity,Resources,Type}',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*Message.php',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*DTO.php',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*Result.php',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*Test.php',
-        ]);
-
-    $services->load($NAMESPACE.'Type\SearchTags\\', $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'SearchTags']));
-};
+/**
+ * Используется для определения Result поисковых данных сущности в индекс
+ */
+interface DataToIndexResultInterface
+{
+    /** Поисковый запрос - составная строка для полнотекстового поиска */
+    public function setTextSearch(Switcher $switcher): string;
+}

@@ -22,7 +22,6 @@
   "require": {
     "php": ">=8.4",
     "baks-dev/core": "^7.2",
-    "predis/predis": "^2.3.0"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest"

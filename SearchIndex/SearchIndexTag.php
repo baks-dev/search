@@ -21,28 +21,33 @@
  *  THE SOFTWARE.
  */
 
-namespace Symfony\Component\DependencyInjection\Loader\Configurator;
+namespace BaksDev\Search\SearchIndex;
 
-use BaksDev\Search\BaksDevSearchBundle;
+use Generator;
 
-return static function(ContainerConfigurator $configurator) {
+/**
+ * Класс-заглушка для интерфейса SearchIndexTagInterface
+ */
+class SearchIndexTag implements SearchIndexTagInterface
+{
 
-    $services = $configurator->services()
-        ->defaults()
-        ->autowire()
-        ->autoconfigure();
+    public static function sort(): int
+    {
+        return 0;
+    }
 
-    $NAMESPACE = BaksDevSearchBundle::NAMESPACE;
-    $PATH = BaksDevSearchBundle::PATH;
+    public function getRepositoryData(): false|Generator
+    {
+        return false;
+    }
 
-    $services->load($NAMESPACE, $PATH)
-        ->exclude([
-            $PATH.'{Entity,Resources,Type}',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*Message.php',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*DTO.php',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*Result.php',
-            $PATH.'**'.DIRECTORY_SEPARATOR.'*Test.php',
-        ]);
+    public function getModuleName(): string
+    {
+        return '';
+    }
 
-    $services->load($NAMESPACE.'Type\SearchTags\\', $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'SearchTags']));
-};
+    public function getPrepareClass(): string
+    {
+        return '';
+    }
+}

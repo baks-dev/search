@@ -23,7 +23,6 @@
 
 namespace BaksDev\Search\SearchIndex;
 
-use Generator;
 
 /**
  * Класс-заглушка для интерфейса SearchIndexTagInterface
@@ -36,7 +35,7 @@ class SearchIndexTag implements SearchIndexTagInterface
         return 0;
     }
 
-    public function getRepositoryData(): false|Generator
+    public function getRepositoryData(): false
     {
         return false;
     }

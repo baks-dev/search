@@ -28,6 +28,7 @@ use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Form\Search\SearchForm;
 use BaksDev\Search\SearchIndex\SearchIndexTagInterface;
 use BaksDev\Search\Type\SearchTags\Collection\SearchIndexTagCollection;
+use Generator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -43,47 +44,49 @@ final class SearchController extends AbstractController
     ): Response
     {
         /** Поиск */
-        $search = new SearchDTO();
+        $SearchDTO = new SearchDTO();
 
         /** Задать теги для использования в поиске */
-        $search->setSearchTags(['products-product']);
+        $SearchDTO->setSearchTags(['products-product']);
 
         $searchForm = $this
             ->createForm(
                 type: SearchForm::class,
-                data: $search,
-                options: ['action' => $this->generateUrl('search:public.search'),]
+                data: $SearchDTO,
+                options: ['action' => $this->generateUrl('search:public.search'),],
             )
             ->handleRequest($request);
 
 
-        $search_results = [];
+        $searchResults = null;
 
-        $searchArrayTags = $search->getSearchTags();
+        $searchArrayTags = $SearchDTO->getSearchTags();
 
         /** Получить результаты поиска по тегам */
         /** @var SearchIndexTagInterface $searchTag */
         foreach($searchTags->cases() as $searchTag)
         {
-
-            $max_results = false;
+            $limit = false;
 
             /** Теги заданы или нет */
-            if(in_array($searchTag->getModuleName(), $search->getSearchTags()) || empty($searchArrayTags))
+            if(in_array($searchTag->getModuleName(), $SearchDTO->getSearchTags()) || empty($searchArrayTags))
             {
                 // Для Ajax запроса указать определенное кол-во
                 if($request->headers->get('X-Requested-With') === 'XMLHttpRequest')
                 {
-                    $max_results = 6;
+                    $limit = 6;
                 }
 
-                /** @var \Generator $searchData */
-                $searchData = $searchTag->getRepositorySearchData($search, $max_results);
+                // Потенциально полиморфный вызов. SearchIndextag не имеет членов в ее иерархии
+                /** @var Generator $searchData */
+                $searchData = $searchTag->getRepositorySearchData($SearchDTO, $limit);
 
-                if($searchData !== false)
+                if(false === $searchData || false === $searchData->valid())
                 {
-                    $search_results[$searchTag->getModuleName()] = $searchData;
+                    continue;
                 }
+
+                $searchResults[$searchTag->getModuleName()] = $searchData;
             }
 
         }
@@ -91,7 +94,7 @@ final class SearchController extends AbstractController
         return $this->render([
             'search' => $searchForm->createView(),
             'headers' => count($searchArrayTags) !== 1,
-            'search_results' => $search_results,
+            'search_results' => $searchResults,
         ]);
 
     }

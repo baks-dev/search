@@ -33,7 +33,7 @@ use Twig\Environment;
 #[AsEventListener(event: ControllerEvent::class)]
 final class SearchFormListener
 {
-    private $twig;
+    private Environment $twig;
 
     private FormFactoryInterface $formFactory;
 

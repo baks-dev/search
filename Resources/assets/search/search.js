@@ -139,7 +139,7 @@ async function submitSearch()
                 });
 
                 let lazy = document.createElement("script");
-                lazy.src = "/assets/js/lazyload.min.js?v=" + Date.now();
+                lazy.src = "/assets/" + $version + "/js/lazyload.min.js?v=" + Date.now();
                 document.head.appendChild(lazy);
             }
             else

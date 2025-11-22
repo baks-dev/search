@@ -24,6 +24,7 @@
 namespace BaksDev\Search\Repository\DataToIndexResult;
 
 use BaksDev\Core\Services\Switcher\Switcher;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Используется для определения Result поисковых данных сущности в индекс
@@ -31,5 +32,5 @@ use BaksDev\Core\Services\Switcher\Switcher;
 interface DataToIndexResultInterface
 {
     /** Поисковый запрос - составная строка для полнотекстового поиска */
-    public function setTextSearch(Switcher $switcher): string;
+    public function setTextSearch(Switcher $switcher, ?TranslatorInterface $translator = null): string;
 }

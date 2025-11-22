@@ -24,6 +24,7 @@
 namespace BaksDev\Search\Repository\DataToIndexResult;
 
 use BaksDev\Core\Services\Switcher\Switcher;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DataToIndexResult implements DataToIndexResultInterface
 {
@@ -31,7 +32,7 @@ class DataToIndexResult implements DataToIndexResultInterface
     /**
      * @inheritDoc
      */
-    public function setTextSearch(Switcher $switcher): string
+    public function setTextSearch(Switcher $switcher, ?TranslatorInterface $translator = null): string
     {
         return '';
     }

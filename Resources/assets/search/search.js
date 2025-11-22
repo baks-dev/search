@@ -54,12 +54,15 @@ if(search_form)
                 input.addEventListener("input", submitSearch.debounce(700));
                 return;
             }
+
             if(HpbxMyNKd >= 1e3)
             {
                 return;
             }
+
             HpbxMyNKd = HpbxMyNKd * 2;
             setTimeout(FFAAVWpUZ, HpbxMyNKd);
+
         }, 100);
     }
 
@@ -91,14 +94,17 @@ async function submitSearch()
     search_spiner.classList.remove("d-none");
     search_icon.classList.add("d-none");
 
+    /** Удаляем предыдущий результат поиска если имееется */
+    search_result.classList.remove("show");
+    search_result.innerHTML = "";
+
     if(!search_result || typeof search_result === "undefined" || input.value.length < 2)
     {
         search_spiner.classList.add("d-none");
         search_icon.classList.remove("d-none");
-        search_result.classList.remove("show");
-        search_result.innerHTML = "";
         return;
     }
+
 
     await fetch(search_form.action, {
         method : search_form.method,
@@ -129,13 +135,13 @@ async function submitSearch()
                 search_result.innerHTML = data;
 
                 // ищем кнопки вызова модального окна для добавления в корзину
-                search_result.querySelectorAll('button.add-basket').forEach(function(button)
+                search_result.querySelectorAll("button.add-basket").forEach(function(button)
                 {
-                        // скрываем список с результатом поиска по клику на кнопку покупки
-                        button.addEventListener('click', function(event)
-                        {
-                            search_result.classList.remove("show")
-                        });
+                    // скрываем список с результатом поиска по клику на кнопку покупки
+                    button.addEventListener("click", function(event)
+                    {
+                        search_result.classList.remove("show");
+                    });
                 });
 
                 let lazy = document.createElement("script");

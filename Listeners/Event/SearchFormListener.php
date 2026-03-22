@@ -64,7 +64,7 @@ final class SearchFormListener
             ->create(
                 type: SearchForm::class,
                 data: $search,
-                options: ['action' => '/search',]
+                options: ['action' => '/search',],
             )
             ->handleRequest($event->getRequest());
 
@@ -73,12 +73,12 @@ final class SearchFormListener
         /* Форма поиска в футере */
         $searchFormFooter = $this->formFactory
             ->createNamed(
-                name: 'search_form_footer' ,
+                name: 'search_form_footer',
                 type: SearchForm::class,
                 data: $search,
                 options: [
                     'action' => '/search',
-                ]
+                ],
             );
 
         $searchFormFooter->handleRequest($event->getRequest());

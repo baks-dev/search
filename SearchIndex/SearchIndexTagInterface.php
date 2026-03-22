@@ -23,8 +23,8 @@
 
 namespace BaksDev\Search\SearchIndex;
 
-use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Generator;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 /**
  * Используется для определения ТЕГА по каждому модулю, участвующему в поиске
@@ -33,14 +33,14 @@ use Generator;
 interface SearchIndexTagInterface
 {
     /**
-     * Возвращает название молуля/пакета, по которому будет идти поиск
-     */
-    public function getModuleName(): string;
-
-    /**
      * Сортировка (чем меньше число - тем первым в итерации будет значение)
      */
     public static function sort(): int;
+
+    /**
+     * Возвращает название молуля/пакета, по которому будет идти поиск
+     */
+    public function getModuleName(): string;
 
     /**
      * Возвращает сущности для индексации

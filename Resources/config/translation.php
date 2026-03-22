@@ -23,7 +23,7 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use BaksDev\Search\BaksDevSearchBundle; 
+use BaksDev\Search\BaksDevSearchBundle;
 use Symfony\Config\FrameworkConfig;
 
 return static function(FrameworkConfig $config) {

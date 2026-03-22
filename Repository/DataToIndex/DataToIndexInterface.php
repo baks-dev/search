@@ -24,6 +24,7 @@
 namespace BaksDev\Search\Repository\DataToIndex;
 
 use BaksDev\Search\Repository\DataToIndexResult\DataToIndexResultInterface;
+use Generator;
 
 /**
  * Используется для отправки поисковых данных сущности в индекс
@@ -33,6 +34,6 @@ interface DataToIndexInterface
     /** @return array<int, DataToIndexResultInterface>|false */
     public function toArray(): array|false;
 
-    /** @return \Generator<int, DataToIndexResultInterface>|false */
-    public function findAll(): \Generator|false;
+    /** @return Generator<int, DataToIndexResultInterface>|false */
+    public function findAll(): Generator|false;
 }

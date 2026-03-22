@@ -23,6 +23,8 @@
 
 namespace BaksDev\Search\Repository\DataToIndex;
 
+use Generator;
+
 class DataToIndex implements DataToIndexInterface
 {
 
@@ -37,7 +39,7 @@ class DataToIndex implements DataToIndexInterface
     /**
      * @inheritDoc
      */
-    public function findAll(): \Generator|false
+    public function findAll(): Generator|false
     {
         return false;
     }

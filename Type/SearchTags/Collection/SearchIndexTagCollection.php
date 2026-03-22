@@ -35,7 +35,8 @@ final class SearchIndexTagCollection
 
     public function __construct(
         #[AutowireIterator('baks.search-tags', defaultPriorityMethod: 'sort')] iterable $searchTags,
-    ) {
+    )
+    {
         $this->searchTags = $searchTags;
     }
 

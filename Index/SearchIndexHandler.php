@@ -31,15 +31,9 @@ use BaksDev\Search\EntityDocument\EntityDocumentInterface;
 class SearchIndexHandler implements SearchIndexInterface
 {
 
-    public function addToIndex(EntityDocumentInterface $entityDocument): void
-    {
+    public function addToIndex(EntityDocumentInterface $entityDocument): void {}
 
-    }
-
-    public function removeFromIndex(EntityDocumentInterface $entityDocument): void
-    {
-
-    }
+    public function removeFromIndex(EntityDocumentInterface $entityDocument): void {}
 
     public function handleSearchQuery(?string $search = null, ?string $searchModule = null): bool|array
     {
